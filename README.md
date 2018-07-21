@@ -13,15 +13,19 @@ A run.json file with all potential sections should looks like this:
 ```
 {
 	"commands": [{
-		"init": "echo 'build system for {{var.website}} in ${DEBUG} mode'"
+		"name": "init",
+		"value": "echo 'build system in ${DEBUG} mode'"
 	}],
 	"env": [{
-		"DEBUG": "false"
-	}],
-	"vars": [{
-		"website": "andrewjohnperry.com"
+		"name": "DEBUG",
+		"value": "false"
 	}]
-}```
+	"vars": [{
+		"name": "website",
+		"value": "andrewjohnperry.com"
+	}]
+}
+```
 
 The environment variables can be accessed in the normal bash way within the commands. Variables can be accessed within the commands
 but are not set in the environment that the command is run in. I can't think of a use case for variables right now but I'm certain there
@@ -30,5 +34,9 @@ will be some. The variable syntax is very similar to jinja2 style templating. It
 # What will version one look like?
 Features:
 1. Can run commands that are specified in any of the three files discussed [earlier](#files)
+2. Can override any type of variable from the command line
+3. Automated installation
+
+
 
 
