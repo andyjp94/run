@@ -95,7 +95,7 @@ function list_commands {
   
  for file in ${LOCS[*]}; do 
     if [ -f $file ]; then
-
+     echo "Commands available in ${file}:"
      cat $file | jq  '.commands'
     fi
 
