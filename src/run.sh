@@ -1,5 +1,7 @@
 #!/bin/bash
 
+
+set -o pipefail
 LOCS=("${PWD}/run.json" "${HOME}/run.json" "/etc/run/run.json")
 
 function search_file {
