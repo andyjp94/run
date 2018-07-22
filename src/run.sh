@@ -102,6 +102,23 @@ function list_commands {
     done
 }
 
+function complete_commands {
+  
+ for file in ${LOCS[*]}; do 
+    if [ -f $file ]; then
+     local FILE_COMMANDS=$(cat ${file} | jq  -r '.commands[] | .name' | sort -u | tr '\n' ' ')
+     local COMMANDS="${COMMANDS} ${FILE_COMMANDS}"
+    fi
+    done
+    COMP_FILE="${HOME}/run_completions.sh"
+    echo "complete -W ${COMMANDS} run.sh" >  ${COMP_FILE}
+    echo "The autocomplete configuration files is available at ${COMP_FILE}."
+    echo "To use it simply source it, to source it on login add:"
+    echo "source ${COMP_FILE}"
+    echo "To your .bashrc"
+}
+
+
 
 function parse_arguments {
 
@@ -153,6 +170,10 @@ do
 		usage
 		exit 0
 		;;
+  -c|--complete)
+    complete_commands
+    exit 0
+    ;;
   -l|--list)
     list_commands
     exit 0
