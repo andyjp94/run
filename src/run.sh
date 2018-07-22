@@ -1,10 +1,10 @@
 #!/bin/bash
 
-
 set -o pipefail
+set -e
+
+VERSION=0.1
 LOCS=("${PWD}/run.json" "${HOME}/run.json" "/etc/run/run.json")
-TEMP_FILE=$(mktemp /tmp/run.XXXXXXXX)
-LOG_FILE=$(mktemp /tmp/run.XXXXXXXX)
 
 function find_cmd {
   JSON_CMD=$(cat $1 | jq --arg COMMAND $2 '.commands[] | select(.name == $COMMAND)')
@@ -41,21 +41,25 @@ function setup_command {
 }
 
 function error_handling { 
-  local TEMP_FILE="${1}"
-  local LOG_FILE="${2}"
-  mv ${TEMP_FILE} ${PWD}/run.failed
-  mv ${LOG_FILE} ${PWD}/run.log
-  echo "The command failed. The script that was attempted is now available at ${PWD}/run.failed"
-  echo "The log is available at ${PWD}/run.log"
-  cleanup
+  error=$?
+  if [ "$error" -ne "0" ]; then
+    mv ${TEMP_FILE} ${PWD}/run.failed
+    mv ${LOG_FILE} ${PWD}/run.log
+    echo "The command failed. The script that was attempted is now available at ${PWD}/run.failed"
+    echo "The log is available at ${PWD}/run.log"
+    cleanup
+    
+  fi
+  exit "${error}"
 }
 
 function run_command {
-  sh -c "${ENV} ${TEMP_FILE}" | tee "${LOG_FILE}"
-  if [ "$?" -ne "0" ]; then
-    error_handling ${TEMP_FILE} ${LOG_FILE}
-    exit 1
+  if [ -n "${QUIET}" ];then
+    sh -c "${ENV} ${TEMP_FILE}" 2&> ${LOG_FILE}
+  else
+    sh -c "${ENV} ${TEMP_FILE}" | tee "${LOG_FILE}"
   fi
+ 
 }
 function main {
  for file in ${LOCS[*]}; do 
@@ -63,15 +67,138 @@ function main {
       if find_cmd $file $1 ; then
         create_environment "${file}" 
         setup_command "${CMD}" "TEMP_FILE" "LOG_FILE"
+        ENV="${ENV}${CLI_ENV}${PATH_CMD}"
         run_command
 
-        cleanup
-        exit 0
+        # cleanup
+        return 0
       fi
     fi
   done
 }
 
+function list_commands {
+  
+ for file in ${LOCS[*]}; do 
+    if [ -f $file ]; then
+
+     cat $file | jq  '.commands'
+    fi
+
+    done
+}
 
 
-main $1
+function parse_arguments {
+
+usage() {
+	echo ""
+	echo
+	echo "Usage: $PROGNAME [-e|--environment-var key=value] [-l|--list] [-q|--quiet] [-v|--version] [-h|--help] commands..."
+	echo
+	echo "Options:"
+	echo
+	echo "  -h, --help"
+	echo "      This help text."
+	echo
+  echo "  -e, --environment-var key=value"
+  echo "      Sets an environment variable for the process, this will override"
+  echo "      any environment variables specified in the run.json files."
+  echo 
+  echo "  -q, --quiet"
+  echo "      Sends stderr and stdout to the log file alone."
+  echo
+	echo "  -l, --list <file>"
+	echo "      List the available commands, these are gathered from: ${LOCS[@]}"
+	echo
+	echo "  -v, --version"
+	echo "      Prints the version of the command."
+	echo
+	echo "  --"
+	echo "      Do not interpret any more arguments as options."
+	echo
+}
+# File name
+readonly PROGNAME=$(basename $0)
+# File name, without the extension
+readonly PROGBASENAME=${PROGNAME%.*}
+# File directory
+readonly PROGDIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+# Arguments
+readonly ARGS="$@"
+# Arguments number
+readonly ARGNUM="$#"
+
+PATH_CMD="export PATH=${PATH}:${PROGDIR};"
+
+
+while [ "$#" -gt 0 ]
+do
+	case "$1" in
+	-h|--help)
+		usage
+		exit 0
+		;;
+  -l|--list)
+    list_commands
+    exit 0
+    ;;
+	-e|--environment-var)
+		CLI_ENV="${CLI_ENV} export ${2};"
+		shift
+		;;
+  -q|--quiet)
+    QUIET=1
+    shift
+    ;;
+  -v|--version)
+    echo "${VERSION}"
+    exit 0
+    ;;
+	--)
+		break
+		;;
+	-*)
+		echo "Invalid option '$1'. Use --help to see the valid options" >&2
+		exit 1
+		;;
+	# an option argument, continue
+	*)	;;
+	esac
+  if ! [[ $string = *"-"* ]]; then
+    return 0
+  fi
+	shift
+done
+
+echo $1
+
+if [ -z $1 ]; then
+  echo "Must specify the command."
+  exit 1
+ fi
+}
+
+parse_arguments $@
+TEMP_FILE=$(mktemp /tmp/run.XXXXXXXX)
+LOG_FILE=$(mktemp /tmp/run.XXXXXXXX)
+trap error_handling EXIT
+
+
+if [[ $1 = *","* ]]; then
+  IFS=', ' read -r -a array <<< $1
+  for element in "${array[@]}"
+  do
+      main $element
+  done
+
+else
+  while [ "$#" -gt 0 ]
+    do
+    main $1
+    shift 
+    done
+fi
+
+
+

@@ -1,8 +1,20 @@
 {
 	"commands": [{
+		"name": "init2",
+		"value": "echo \"test system in ${DEBUG} mode\""
+	},{
 		"name": "init",
 		"value": "echo \"build system in ${DEBUG} mode\""
-	}],
+	},
+	{
+		"name": "recursion",
+		"value": "run.sh init"
+	},
+{
+	"name": "test",
+	"value": "test -n ${HOME}"
+}],
+    
 	"env": [{
 		"name": "DEBUG",
 		"value": "false"
