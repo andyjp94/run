@@ -1,9 +1,16 @@
 {
 	"commands": [{
 		"name": "init",
-		"value": "echo 'build system in ${DEBUG} mode'"
+		"value": "echo \"build system in ${DEBUG} mode\""
 	}],
-
+	"env": [{
+		"name": "DEBUG",
+		"value": "false"
+	},
+	{
+		"name": "a",
+		"value": "1"	
+	}],
 	"vars": [{
 		"name": "website",
 		"value": "andrewjohnperry.com"
