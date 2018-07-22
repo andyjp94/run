@@ -6,7 +6,7 @@ LOCS=("${PWD}/run.json" "${HOME}/run.json" "/etc/run/run.json")
 TEMP_FILE=$(mktemp /tmp/run.XXXXXXXX)
 LOG_FILE=$(mktemp /tmp/run.XXXXXXXX)
 
-function search_file {
+function find_cmd {
   JSON_CMD=$(cat $1 | jq --arg COMMAND $2 '.commands[] | select(.name == $COMMAND)')
   if [ "${JSON_CMD}" != "" ]; then
     CMD="$(echo ${JSON_CMD} | jq -r '.value')"
@@ -60,7 +60,7 @@ function run_command {
 function main {
  for file in ${LOCS[*]}; do 
     if [ -f $file ]; then
-      if search_file $file $1 ; then
+      if find_cmd $file $1 ; then
         create_environment "${file}" 
         setup_command "${CMD}" "TEMP_FILE" "LOG_FILE"
         run_command
