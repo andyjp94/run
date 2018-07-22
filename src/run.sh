@@ -106,10 +106,12 @@ function complete_commands {
   
  for file in ${LOCS[*]}; do 
     if [ -f $file ]; then
-     local FILE_COMMANDS=$(cat ${file} | jq  -r '.commands[] | .name' | sort -u | tr '\n' ' ')
+     local FILE_COMMANDS=$(cat ${file} | jq  -r '.commands[] | .name' )
      local COMMANDS="${COMMANDS} ${FILE_COMMANDS}"
     fi
     done
+    COMMANDS=$(echo "${COMMANDS}" | xargs -n 1 | sort -u )
+
     COMP_FILE="${HOME}/run_completions.sh"
     echo "complete -W ${COMMANDS} run.sh" >  ${COMP_FILE}
     echo "The autocomplete configuration files is available at ${COMP_FILE}."
