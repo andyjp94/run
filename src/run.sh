@@ -28,6 +28,19 @@ function create_environment {
   
 }
 
+function create_path {
+  PATH_CMD="export PATH=${PATH}:${PROGDIR}"
+  local RUN_FILE="${1}"
+  local num=$(cat ${1} | jq '.path | length')
+  if [ "$num" != "0" ]; then
+    for index in $( seq 1 ${num}); do
+        local path_json=$(cat $RUN_FILE | jq  -r --arg INDEX $((index-1)) '.path[$INDEX |tonumber]')
+         PATH_CMD="${PATH_CMD}:${path_json}"
+    done
+  fi
+  PATH_CMD="${PATH_CMD};"
+}
+
 function cleanup {
   rm ${TEMP_FILE}
   rm ${LOG_FILE}
@@ -66,6 +79,7 @@ function main {
     if [ -f $file ]; then
       if find_cmd $file $1 ; then
         create_environment "${file}" 
+        create_path "${file}" 
         setup_command "${CMD}" "TEMP_FILE" "LOG_FILE"
         ENV="${ENV}${CLI_ENV}${PATH_CMD}"
         run_command
@@ -129,7 +143,7 @@ readonly ARGS="$@"
 # Arguments number
 readonly ARGNUM="$#"
 
-PATH_CMD="export PATH=${PATH}:${PROGDIR};"
+
 
 
 while [ "$#" -gt 0 ]

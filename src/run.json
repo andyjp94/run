@@ -10,11 +10,18 @@
 		"name": "recursion",
 		"value": "run.sh init"
 	},
+	{
+		"name": "path",
+		"value": "echo $PATH"
+	},
 {
 	"name": "test",
 	"value": "test -n ${HOME}"
 }],
-    
+    "path": [
+		"/tmp",
+		"/var/tmp"
+	],
 	"env": [{
 		"name": "DEBUG",
 		"value": "false"
