@@ -7,4 +7,4 @@ before_install:
   - docker build -t bats .
 
 script:
-  - docker run bats
+  - docker run bats -e TRAVIS_JOB_ID="$TRAVIS_JOB_ID" -e TRAVIS_BRANCH="$TRAVIS_BRANCH"
