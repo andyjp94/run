@@ -7,15 +7,24 @@
 #
 # To enable this hook, rename this file to "pre-commit".
 
-  files=$(git diff --cached --name-only)
-  for file in $files; do
-    if [ "text/x-shellscript" == "$(file -b --mime-type "${file}")" ];then
+
+
+if command -v shellcheck; then
+
+	files=$(git diff --cached --name-only)
+	for file in $files; do
+	if [ "text/x-shellscript" == "$(file -b --mime-type "${file}")" ];then
 		if  ! shellcheck "${file}" &>/dev/null ; then
-		 echo "${file} does not meet shellchecks standards"
-		 exit 1
-		 fi
+			echo "${file} does not meet shellchecks standards"
+			exit 1
+			fi
 	fi
-  done
+	done
+
+else 
+  echo "You must install shellcheck to contribute to this repository"
+  exit 1
+fi
  
 
 
