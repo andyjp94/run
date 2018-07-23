@@ -18,7 +18,7 @@ function find_cmd {
 
 function create_environment { 
   local RUN_FILE="${1}"
-  local num=$(cat ${1} | jq '.env | length')
+  local num=$(cat ${RUN_FILE} | jq '.env | length')
   if [ "$num" != "0" ]; then
     for index in $( seq 1 ${num}); do
         local env_json=$(cat $RUN_FILE | jq  --arg INDEX $((index-1)) '.env[$INDEX |tonumber]')
