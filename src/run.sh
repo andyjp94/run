@@ -85,7 +85,7 @@ function cleanup {
     rm "${LOG_FILE}"
   fi
   
-  unset "ENV" "LOCAL_ENV" "CLI_ENV" "PATH_CMD"
+  unset "ENV" "LOCAL_ENV" "PATH_CMD"
 }
 
 
