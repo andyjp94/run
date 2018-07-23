@@ -78,8 +78,13 @@ function create_path {
 }
 
 function cleanup {
-  rm "${TEMP_FILE}"
-  rm "${LOG_FILE}"
+  if [ -f "${TEMP_FILE}" ]; then
+    rm "${TEMP_FILE}"
+  fi
+  if [ -f "${LOG_FILE}" ]; then
+    rm "${LOG_FILE}"
+  fi
+  
   unset "ENV" "LOCAL_ENV" "CLI_ENV" "PATH_CMD"
 }
 
