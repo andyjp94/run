@@ -1,10 +1,12 @@
 {
 	"commands": [{
-		"name": "init2",
-		"value": "echo \"test system in ${DEBUG} mode\""
-	},{
 		"name": "init",
-		"value": "echo \"build system in ${DEBUG} mode\""
+		"value": "echo \"test system in ${DEBUG} mode and ${asdf}\"",
+		"env": [{
+			"name": "asdf",
+			"value": "yay"
+		}],
+		"path": []
 	},
 	{
 		"name": "recursion",

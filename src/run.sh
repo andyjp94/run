@@ -27,6 +27,17 @@ function create_environment {
   fi
   
 }
+function create_environment_local {
+  local RUN_FILE="${1}"
+  local env_dict=$(cat ${RUN_FILE} | jq --arg COMMAND $2 '.commands[] | select(.name == $COMMAND) |.env')
+  local num=$(echo ${env_dict} | jq 'length')
+  if [ "$num" != "0" ]; then
+    for index in $( seq 1 ${num}); do
+        local env_json=$(echo $env_dict | jq  --arg INDEX $((index-1)) '.[$INDEX |tonumber]')
+         LOCAL_ENV="${LOCAL_ENV} export $(echo $env_json | jq '.name')=$(echo $env_json | jq '.value');"; 
+    done
+  fi
+}
 
 function create_path {
   PATH_CMD="export PATH=${PATH}:${PROGDIR}"
@@ -78,10 +89,11 @@ function main {
  for file in ${LOCS[*]}; do 
     if [ -f $file ]; then
       if find_cmd $file $1 ; then
-        create_environment "${file}" 
+        create_environment "${file}"
+        create_environment_local "$file" $1
         create_path "${file}" 
         setup_command "${CMD}" "TEMP_FILE" "LOG_FILE"
-        ENV="${ENV}${CLI_ENV}${PATH_CMD}"
+        ENV="${ENV}${LOCAL_ENV}${CLI_ENV}${PATH_CMD}"
         run_command
 
         # cleanup
