@@ -90,10 +90,6 @@ function setup_command {
 function error_handling { 
   error=$?
   if [ "$error" -ne "0" ]; then
-    mv "${TEMP_FILE}" "${PWD}"/run.failed
-    mv "${LOG_FILE}" "${PWD}"/run.log
-    echo "The command failed. The script that was attempted is now available at ${PWD}/run.failed"
-    echo "The log is available at ${PWD}/run.log"
     cleanup
     
   fi
@@ -101,12 +97,26 @@ function error_handling {
 }
 
 function run_command {
+  trap command_error_handling EXIT
   if [ -n "${QUIET}" ];then
     sh -c "${ENV} ${TEMP_FILE}" 2&> "${LOG_FILE}"
   else
     sh -c "${ENV} ${TEMP_FILE}" | tee "${LOG_FILE}"
   fi
- 
+}
+
+function command_error_handling {
+  error=$?
+  if [ "$error" -ne "0" ]; then
+    mv "${TEMP_FILE}" "${PWD}"/run.failed
+    mv "${LOG_FILE}" "${PWD}"/run.log
+    echo "The command failed. The script that was attempted is now available at ${PWD}/run.failed"
+    echo "The log is available at ${PWD}/run.log"
+
+  fi
+  cleanup
+  exit "${error}"
+  
 }
 
 function validate_file {
@@ -130,6 +140,8 @@ function main {
         create_environment_local "$file" "${1}"
         create_path_local "${file}" "${1}"
         create_path "${file}" 
+
+        
         setup_command "${CMD}" "TEMP_FILE" "LOG_FILE"
         ENV="${ENV}${LOCAL_ENV}${CLI_ENV}${PATH_CMD}"
 
@@ -138,6 +150,8 @@ function main {
       fi
     fi
   done
+   echo "error: command ${1} not found"
+   exit 1
 }
 
 function list_commands {
@@ -258,20 +272,22 @@ do
 	shift
 done
 
-
-if [ -z "${1}" ]; then
-  echo "Must specify the command."
-  exit 1
- fi
 }
 
-parse_arguments "${@}"
-TEMP_FILE=$(mktemp /tmp/run.XXXXXXXX)
-LOG_FILE=$(mktemp /tmp/run.XXXXXXXX)
-trap error_handling EXIT
 
+function new_main {
+  parse_arguments "${@}"
+  TEMP_FILE=$(mktemp /tmp/run.XXXXXXXX)
+  LOG_FILE=$(mktemp /tmp/run.XXXXXXXX)
+  trap error_handling EXIT
 
-if [[ $1 = *","* ]]; then
+  if [ -z "${1}" ]; then
+     main "default"
+     exit 0
+  fi
+  
+
+if [[ ${1} = *","* ]]; then
   IFS=', ' read -r -a array <<< "${1}"
   for element in "${array[@]}"
   do
@@ -281,10 +297,19 @@ if [[ $1 = *","* ]]; then
 else
   while [ "$#" -gt 0 ]
     do
+    
     main "${1}"
     shift 
     done
 fi
+}
+
+new_main "$@"
+
+
+
+
+
 
 
 
