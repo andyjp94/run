@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 set -o pipefail
 set -e
 
@@ -7,6 +8,7 @@ VERSION=0.1
 LOCS=("${PWD}/run.json" "${HOME}/run.json" "/etc/run/run.json")
 
 function find_cmd {
+
   JSON_CMD=$(jq --arg COMMAND "${2}" '.commands[] | select(.name == $COMMAND)' < "${1}")
   if [ "${JSON_CMD}" != "" ]; then
     CMD="$(echo "${JSON_CMD}" | jq -r '.value')"
@@ -126,6 +128,7 @@ function validate_file {
   NUM_COMMANDS=$(jq '.commands | length' < "${FILE}")
   NUM_UNIQUE_COMMANDS=$(jq '.commands | unique_by(.name) | length' < "${FILE}")
   
+
   if [ "${NUM_COMMANDS}" != "${NUM_UNIQUE_COMMANDS}" ]; then
     echo "oh dear"
     exit 1
@@ -135,6 +138,7 @@ function main {
  for file in ${LOCS[*]}; do 
     if [ -f "${file}" ]; then
       validate_file "${file}" "${1}"
+      
       if find_cmd "$file" "${1}" ; then
         create_environment "${file}"
         create_environment_local "$file" "${1}"
@@ -144,6 +148,7 @@ function main {
         
         setup_command "${CMD}" "TEMP_FILE" "LOG_FILE"
         ENV="${ENV}${LOCAL_ENV}${CLI_ENV}${PATH_CMD}"
+        echo ${ENV}
 
         run_command
         return 0
@@ -188,89 +193,85 @@ function complete_commands {
 
 function parse_arguments {
 
-usage() {
-	echo ""
-	echo
-	echo "Usage: $PROGNAME [-e|--environment-var key=value] [-l|--list] [-q|--quiet] [-v|--version] [-h|--help] commands..."
-	echo
-	echo "Options:"
-	echo
-	echo "  -h, --help"
-	echo "      This help text."
-	echo
-  echo "  -e, --environment-var key=value"
-  echo "      Sets an environment variable for the process, this will override"
-  echo "      any environment variables specified in the run.json files."
-  echo 
-  echo "  -q, --quiet"
-  echo "      Sends stderr and stdout to the log file alone."
-  echo
-	echo "  -l, --list <file>"
-	echo "      List the available commands, these are gathered from: ${LOCS[*]}"
-	echo
-	echo "  -v, --version"
-	echo "      Prints the version of the command."
-	echo
-	echo "  --"
-	echo "      Do not interpret any more arguments as options."
-	echo
-}
-# File name
-readonly PROGNAME=$(basename "${0}")
-# File name, without the extension
-readonly PROGBASENAME=${PROGNAME%.*}
-# File directory
-readonly PROGDIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-# Arguments
-readonly ARGS=("$@")
-# Arguments number
-readonly ARGNUM="$#"
+  usage() {
+    echo ""
+    echo
+    echo "Usage: $PROGNAME [-e|--environment-var key=value] [-l|--list] [-q|--quiet] [-v|--version] [-h|--help] commands..."
+    echo
+    echo "Options:"
+    echo
+    echo "  -h, --help"
+    echo "      This help text."
+    echo
+    echo "  -e, --environment-var key=value"
+    echo "      Sets an environment variable for the process, this will override"
+    echo "      any environment variables specified in the run.json files."
+    echo 
+    echo "  -q, --quiet"
+    echo "      Sends stderr and stdout to the log file alone."
+    echo
+    echo "  -l, --list <file>"
+    echo "      List the available commands, these are gathered from: ${LOCS[*]}"
+    echo
+    echo "  -v, --version"
+    echo "      Prints the version of the command."
+    echo
+    echo "  --"
+    echo "      Do not interpret any more arguments as options."
+    echo
+  }
+  # File name
+  readonly PROGNAME=$(basename "${0}")
+  # File name, without the extension
+  readonly PROGBASENAME=${PROGNAME%.*}
+  # File directory
+  readonly PROGDIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+  # Arguments
+  readonly ARGS=("$@")
+  # Arguments number
+  readonly ARGNUM="$#"
 
+  while [ "$#" -gt 0 ]
+  do
+    case "$1" in
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    -c|--complete)
+      complete_commands
+      exit 0
+      ;;
+    -l|--list)
+      list_commands
+      exit 0
+      ;;
+    -e|--environment)
+      shift
+      CLI_ENV="${CLI_ENV} export ${1};"
+      shift
+      ;;
+    -q|--quiet)
+      QUIET=1
+      shift
+      ;;
+    -v|--version)
+      echo "${VERSION}"
+      exit 0
+      ;;
+    -*)
+      echo "Invalid option '$1'. Use --help to see the valid options" >&2
+      exit 1
+      ;;
+    # an option argument, continue
+    *)  
+      break
+    ;;
+    esac
 
+  done
 
-
-while [ "$#" -gt 0 ]
-do
-	case "$1" in
-	-h|--help)
-		usage
-		exit 0
-		;;
-  -c|--complete)
-    complete_commands
-    exit 0
-    ;;
-  -l|--list)
-    list_commands
-    exit 0
-    ;;
-	-e|--environment-var)
-		CLI_ENV="${CLI_ENV} export ${2};"
-		shift
-		;;
-  -q|--quiet)
-    QUIET=1
-    shift
-    ;;
-  -v|--version)
-    echo "${VERSION}"
-    exit 0
-    ;;
-	--)
-		break
-		;;
-	-*)
-		echo "Invalid option '$1'. Use --help to see the valid options" >&2
-		exit 1
-		;;
-	# an option argument, continue
-	*)	;;
-	esac
-          if ! [[ "${1}" = *"-"* ]]; then
-            return 0
-          fi
-	shift
-done
+  cmds=("$@")
 
 }
 
@@ -280,28 +281,19 @@ function new_main {
   TEMP_FILE=$(mktemp /tmp/run.XXXXXXXX)
   LOG_FILE=$(mktemp /tmp/run.XXXXXXXX)
   trap error_handling EXIT
+  
 
-  if [ -z "${1}" ]; then
+  if [ -z "${cmds[0]}" ]; then
      main "default"
      exit 0
   fi
   
 
-if [[ ${1} = *","* ]]; then
-  IFS=', ' read -r -a array <<< "${1}"
-  for element in "${array[@]}"
-  do
-      main "${element}"
+  for cmd in "${cmds[@]}"; do
+  echo ${cmd}
+    main "${cmd}"
   done
 
-else
-  while [ "$#" -gt 0 ]
-    do
-    
-    main "${1}"
-    shift 
-    done
-fi
 }
 
 new_main "$@"
