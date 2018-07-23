@@ -100,6 +100,13 @@
   [ "$output" = "" ]
 }
 
+@test "Run multiple commands" {
+  cp "_env.json" "${LOC}"
+  run ../src/run.sh -e CUSTOM_ENV=works "cli" "local"
+  [ "$status" -eq 0 ]
+  [ "$output" = "Setting env in command works\nSetting env in command works" ]
+}
+
 
 
 function teardown {
