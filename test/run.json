@@ -6,7 +6,9 @@
 			"name": "asdf",
 			"value": "yay"
 		}],
-		"path": []
+		"path": [
+			"/etc"
+		]
 	},
 	{
 		"name": "recursion",

@@ -43,9 +43,24 @@ function create_environment_local {
     done
   fi
 }
+function create_path_local {
+  PATH_CMD="export PATH=${PATH}:${PROGDIR}"
+  local RUN_FILE="${1}"
+  local env_dict="{}"
+  path_dict=$(jq --arg COMMAND "${2}" '.commands[] | select(.name == $COMMAND) |.path' < "${RUN_FILE}")
+  local num=0
+  num=$(echo "${path_dict}" | jq 'length')
+  if [ "${num}" != "0" ]; then
+      local path_json=" "
+    for index in $( seq 1 "${num}"); do
+        path_json=$(echo "${path_dict}" | jq -r --arg INDEX $((index-1)) '.[$INDEX |tonumber]')
+        LOCAL_PATH="${PATH_CMD}:${path_json}" 
+    done
+  fi
+}
 
 function create_path {
-  PATH_CMD="export PATH=${PATH}:${PROGDIR}"
+  
   local RUN_FILE="${1}"
   local num=0
   num=$(jq '.path | length' < "${RUN_FILE}")
@@ -54,7 +69,7 @@ function create_path {
     local path_json=""
     for index in $( seq 1 "${num}"); do
         path_json=$(jq  -r --arg INDEX $((index-1)) '.path[$INDEX |tonumber]' < "${RUN_FILE}")
-         PATH_CMD="${PATH_CMD}:${path_json}"
+         PATH_CMD="${LOCAL_PATH}:${path_json}"
     done
   fi
   PATH_CMD="${PATH_CMD};"
@@ -99,9 +114,11 @@ function main {
       if find_cmd "$file" "${1}" ; then
         create_environment "${file}"
         create_environment_local "$file" "${1}"
+        create_path_local "${file}" "${1}"
         create_path "${file}" 
         setup_command "${CMD}" "TEMP_FILE" "LOG_FILE"
         ENV="${ENV}${LOCAL_ENV}${CLI_ENV}${PATH_CMD}"
+
         run_command
         return 0
       fi
