@@ -108,9 +108,23 @@ function run_command {
   fi
  
 }
+
+function validate_file {
+  local FILE="$1"
+  local NUM_COMMANDS=""
+  local NUM_UNIQUE_COMMANDS=""
+  NUM_COMMANDS=$(jq '.commands | length' < "${FILE}")
+  NUM_UNIQUE_COMMANDS=$(jq '.commands | unique_by(.name) | length' < "${FILE}")
+  
+  if [ "${NUM_COMMANDS}" != "${NUM_UNIQUE_COMMANDS}" ]; then
+    echo "oh dear"
+    exit 1
+  fi 
+}
 function main {
  for file in ${LOCS[*]}; do 
     if [ -f "${file}" ]; then
+      validate_file "${file}" "${1}"
       if find_cmd "$file" "${1}" ; then
         create_environment "${file}"
         create_environment_local "$file" "${1}"
