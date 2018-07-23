@@ -80,6 +80,7 @@ function create_path {
 function cleanup {
   rm "${TEMP_FILE}"
   rm "${LOG_FILE}"
+  unset "ENV" "LOCAL_ENV" "CLI_ENV" "PATH_CMD"
 }
 
 
@@ -148,9 +149,9 @@ function main {
         
         setup_command "${CMD}" "TEMP_FILE" "LOG_FILE"
         ENV="${ENV}${LOCAL_ENV}${CLI_ENV}${PATH_CMD}"
-        echo ${ENV}
 
         run_command
+        cleanup
         return 0
       fi
     fi
@@ -290,7 +291,6 @@ function new_main {
   
 
   for cmd in "${cmds[@]}"; do
-  echo ${cmd}
     main "${cmd}"
   done
 
