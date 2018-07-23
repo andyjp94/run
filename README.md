@@ -37,6 +37,17 @@ Features:
 2. Can override any type of variable from the command line
 3. Automated installation
 
+# Contributing
+1. Clone repository
+2. Configure the hooks
+```
+git config core.hooksPath .githooks
+```
+3. Install the development dependencies:
+```
+jq
+shellcheck
+```
 
 
 
