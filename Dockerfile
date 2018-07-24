@@ -21,4 +21,5 @@ WORKDIR /root/test
 ENV LOC "./run.json"
 
 
-CMD ["/bin/sh", "-c", "./local_runner.bats"]
+ENTRYPOINT ["/bin/sh", "-c", "./local_runner.bats"]
+CMD ["./local_runner.bats"]
