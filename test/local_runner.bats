@@ -42,7 +42,7 @@
   run ../src/run.sh -l
   [ "$status" -eq 0 ]
 
-  [ "${lines[0]}" = "Commands available in ${LOC}/run.json:" ]
+  [ "${lines[0]}" = "Commands available in ${LOC}:" ]
   [ "${lines[1]}" = "[" ]
   [ "${lines[2]}" = "  {" ]
   [ "${lines[3]}" = '    "name": "default",' ]

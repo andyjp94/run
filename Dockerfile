@@ -10,7 +10,7 @@ RUN apt update && apt install -y jq shellcheck git &&\
 ADD src /root/src
 ADD test /root/test
 WORKDIR /root/test
-ENV LOC "./run.json"
+ENV LOC "/root/test/run.json"
 
 
 ENTRYPOINT ["/bin/sh", "-c", "./local_runner.bats"]
