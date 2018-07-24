@@ -1,0 +1,7 @@
+{
+	"commands": [
+        { "name": "default",
+		"value": "echo \"custom: This is the default command\""
+        }
+    ]
+}
