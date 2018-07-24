@@ -9,7 +9,7 @@
 
 
 
-if command -v shellcheck; then
+if command -v shellcheck &>/dev/null; then
 
 	files=$(git diff --cached --name-only)
 	for file in $files; do
