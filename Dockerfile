@@ -21,4 +21,7 @@ WORKDIR /root/test
 ENV LOC "./run.json"
 
 
-CMD ["kcov", "--coveralls-id=$TRAVIS_JOB_ID", "--include-path=/root/src" "/tmp", "bats", "./local_runner.sh"]
+CMD "/usr/local/bin/kcov" "--coveralls-id=$TRAVIS_JOB_ID" "--include-path=/root/src" "/tmp" "bats" "./local_runner.sh"
+# CMD ["sh" "-c" "/usr/local/bin/kcov", "--coveralls-id=$TRAVIS_JOB_ID", "--include-path=/root/src" "/tmp", "bats", "./local_runner.sh"]
+# CMD ["/usr/local/bin/kcov", "--coveralls-id=$TRAVIS_JOB_ID", "--include-path=/root/src" "/tmp", "bats", "./local_runner.sh"]
+# CMD ["/usr/local/bin/kcov", "--coveralls-id=$TRAVIS_JOB_ID",]
