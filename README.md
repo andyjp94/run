@@ -15,17 +15,57 @@ A run.json file with all potential sections should looks like this:
 	"commands": [{
 		"name": "init",
 		"value": "echo 'build system in ${DEBUG} mode'"
+		"env": [
+			"name": "DEBUG",
+			"value": "true"
+		],
+		"path": [
+			"/opt/scripts"
+		]
 	}],
 	"env": [{
 		"name": "DEBUG",
 		"value": "false"
-	}]
-	"vars": [{
-		"name": "website",
-		"value": "andrewjohnperry.com"
-	}]
-}
+	}],
+	"path": [
+		"/opt/automation"
+	]
+
+}  
 ```
+
+## How To:
+Run the first default command found
+```
+./run.sh
+```  
+Run the default command found in "${HOME}/run.json
+```
+./run.sh --user
+```
+List all available commands
+```
+./run.sh -l
+```
+List the globally available commands
+```
+./run.sh -l -g
+```
+Generate the autocompletion file for all command
+```
+./run.sh -c
+```
+Generate the autocompletion file for a custom command
+```
+./run.sh -c -f x.json
+```
+Override an environment variable in run.json from cli
+```
+./run.sh -e x=y
+```
+
+
+
 
 The environment variables can be accessed in the normal bash way within the commands. Variables can be accessed within the commands
 but are not set in the environment that the command is run in. I can't think of a use case for variables right now but I'm certain there
@@ -47,6 +87,7 @@ git config core.hooksPath .githooks
 ```
 jq
 shellcheck
+https://github.com/sstephenson/bats.git
 ```
 
 
