@@ -252,12 +252,12 @@ function parse_arguments {
       exit 0
       ;;
     -c|--complete)
-      complete_commands
-      exit 0
+      COMPLETE="true"
+      shift
       ;;
     -l|--list)
-      list_commands
-      exit 0
+      LIST="true"
+      shift
       ;;
     -u|--user)
       LOCS=("${LOCS[1]}")
@@ -296,6 +296,17 @@ function parse_arguments {
     esac
 
   done
+
+  if ! [ -z ${COMPLETE} ]; then
+    complete_commands
+    exit 0
+  fi
+
+  if ! [ -z ${LIST} ]; then
+    list_commands
+    exit 0
+  fi
+
 
   cmds=("$@")
 
