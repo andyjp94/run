@@ -50,11 +50,7 @@
   [ "${lines[5]}" = "  }" ]
   [ "${lines[6]}" = "]" ]
 
-
-  # [ "$output" = "" ]
 }
-
-
 
 
 @test "Set global environment variable for command" {
