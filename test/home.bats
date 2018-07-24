@@ -80,11 +80,7 @@
   [ "$output" = "custom: This is the default command" ]
 }
 
-function teardown {
-    rm "./run.json"
-    rm "${HOME}/run.json"
-    rm "/etc/run/run.json"
-}
+
 
 @test "Just list global commands" {
   cp "./local/_default.json" "./run.json"
@@ -166,4 +162,194 @@ function teardown {
   [ "${lines[2]}" =  "source ${HOME}/run_completions.sh" ]
   [ "${lines[3]}" =  "To your .bashrc" ]
 
+}
+
+
+
+@test "Create the run.json in the working directory" {
+
+  run ../src/run.sh -i -wd
+
+  test_json="/tmp/test.json"
+
+    [ "$status" -eq 0 ]
+
+    cat << EOF > "${test_json}"
+{
+	"command": [{
+		"name": "default",
+		"value": "echo \"This is the default command\"",
+		"env": [{
+			"name": "local_env",
+			"value": "true"
+		}],
+		"path": ["/usr/sbin"]
+	}],
+	"env": [{
+		"name": "global_env",
+		"value": "true"
+	}],
+	"path": [
+		"/usr/local/bin"
+	]
+}
+EOF
+
+  diff "${test_json}" "./run.json"
+   [ "$?" = "0" ]
+
+
+}
+
+
+@test "Create the run.json in the home directory" {
+
+  run ../src/run.sh -i -u
+
+  test_json="/tmp/test.json"
+
+    [ "$status" -eq 0 ]
+
+    cat << EOF > "${test_json}"
+{
+	"command": [{
+		"name": "default",
+		"value": "echo \"This is the default command\"",
+		"env": [{
+			"name": "local_env",
+			"value": "true"
+		}],
+		"path": ["/usr/sbin"]
+	}],
+	"env": [{
+		"name": "global_env",
+		"value": "true"
+	}],
+	"path": [
+		"/usr/local/bin"
+	]
+}
+EOF
+
+  diff "${test_json}" "${HOME}/run.json"
+   [ "$?" = "0" ]
+
+}
+
+
+@test "Create the run.json in the /etc/run/ directory" {
+
+  run ../src/run.sh -i -g
+
+  test_json="/tmp/test.json"
+
+    [ "$status" -eq 0 ]
+
+    cat << EOF > "${test_json}"
+{
+	"command": [{
+		"name": "default",
+		"value": "echo \"This is the default command\"",
+		"env": [{
+			"name": "local_env",
+			"value": "true"
+		}],
+		"path": ["/usr/sbin"]
+	}],
+	"env": [{
+		"name": "global_env",
+		"value": "true"
+	}],
+	"path": [
+		"/usr/local/bin"
+	]
+}
+EOF
+
+  diff "${test_json}" "/etc/run/run.json"
+   [ "$?" = "0" ]
+
+}
+
+@test "Create the run.json in a custom directory" {
+
+  run ../src/run.sh -i -f "/tmp/run.json"
+
+  test_json="/tmp/test.json"
+
+    [ "$status" -eq 0 ]
+
+    cat << EOF > "${test_json}"
+{
+	"command": [{
+		"name": "default",
+		"value": "echo \"This is the default command\"",
+		"env": [{
+			"name": "local_env",
+			"value": "true"
+		}],
+		"path": ["/usr/sbin"]
+	}],
+	"env": [{
+		"name": "global_env",
+		"value": "true"
+	}],
+	"path": [
+		"/usr/local/bin"
+	]
+}
+EOF
+
+  diff "${test_json}" "/tmp/run.json"
+   [ "$?" = "0" ]
+
+}
+
+@test "Create the run.json in all the standard directories" {
+
+  run ../src/run.sh -i
+
+  test_json="/tmp/test.json"
+
+    [ "$status" -eq 0 ]
+
+    cat << EOF > "${test_json}"
+{
+	"command": [{
+		"name": "default",
+		"value": "echo \"This is the default command\"",
+		"env": [{
+			"name": "local_env",
+			"value": "true"
+		}],
+		"path": ["/usr/sbin"]
+	}],
+	"env": [{
+		"name": "global_env",
+		"value": "true"
+	}],
+	"path": [
+		"/usr/local/bin"
+	]
+}
+EOF
+
+  diff "${test_json}" "/etc/run/run.json"
+   [ "$?" = "0" ]
+
+  diff "${test_json}" "./run.json"
+   [ "$?" = "0" ]
+
+  diff "${test_json}" "${HOME}/run.json"
+   [ "$?" = "0" ]
+
+}
+
+
+function teardown {
+    for file in "./run.json" "${HOME}/run.json" "/etc/run/run.json"; do
+      if [ -f "${file}" ]; then
+        rm ${file}
+      fi
+    done
 }

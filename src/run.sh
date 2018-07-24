@@ -194,7 +194,30 @@ function complete_commands {
     echo "To your .bashrc"
 }
 
-
+function init {
+   for file in ${LOCS[*]}; do 
+    cat << EOF > "${file}"
+{
+	"command": [{
+		"name": "default",
+		"value": "echo \"This is the default command\"",
+		"env": [{
+			"name": "local_env",
+			"value": "true"
+		}],
+		"path": ["/usr/sbin"]
+	}],
+	"env": [{
+		"name": "global_env",
+		"value": "true"
+	}],
+	"path": [
+		"/usr/local/bin"
+	]
+}
+EOF
+  done
+}
 
 function parse_arguments {
 
@@ -214,6 +237,12 @@ function parse_arguments {
     echo 
     echo "  -f, --file filepath"
     echo "      Allows the use of a custom run.json"
+    echo 
+    echo "  -i, --init []"
+    echo "      Create a default run.json in any or all locations"
+    echo 
+    echo "  -wd, --working-directory"
+    echo "      Uses the run.json available at ./run.json"
     echo 
     echo "  -u, --user"
     echo "      Uses the run.json available at ${HOME}/run.json"
@@ -259,6 +288,15 @@ function parse_arguments {
       LIST="true"
       shift
       ;;
+    -i|--init)
+      INIT="true"
+      shift
+      ;;
+    -wd|--working-directory)
+      LOCS=("${LOCS[0]}")
+      shift
+      ;;
+
     -u|--user)
       LOCS=("${LOCS[1]}")
       shift
@@ -296,6 +334,11 @@ function parse_arguments {
     esac
 
   done
+
+  if ! [ -z ${INIT} ]; then
+    init
+    exit 0
+  fi
 
   if ! [ -z ${COMPLETE} ]; then
     complete_commands

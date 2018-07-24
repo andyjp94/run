@@ -12,26 +12,23 @@ This command will look for commands in the following files in the order shown:
 A run.json file with all potential sections should looks like this:
 ```
 {
-	"commands": [{
-		"name": "init",
-		"value": "echo 'build system in ${DEBUG} mode'"
-		"env": [
-			"name": "DEBUG",
+	"command": [{
+		"name": "default",
+		"value": "echo \"This is the default command\"",
+		"env": [{
+			"name": "local_env",
 			"value": "true"
-		],
-		"path": [
-			"/opt/scripts"
-		]
+		}],
+		"path": ["/usr/sbin"]
 	}],
 	"env": [{
-		"name": "DEBUG",
-		"value": "false"
+		"name": "global_env",
+		"value": "true"
 	}],
 	"path": [
-		"/opt/automation"
+		"/usr/local/bin"
 	]
-
-}  
+}   
 ```
 
 ## How To:
@@ -42,6 +39,14 @@ Run the first default command found
 Run the default command found in "${HOME}/run.json
 ```
 ./run.sh --user
+```
+Create all the run.json files
+```
+./run.sh -i
+```
+Create the run.json in the working directory
+```
+./run.sh -wd
 ```
 List all available commands
 ```
