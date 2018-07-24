@@ -212,6 +212,9 @@ function parse_arguments {
     echo "      Sets an environment variable for the process, this will override"
     echo "      any environment variables specified in the run.json files."
     echo 
+    echo "  -f, --file filepath"
+    echo "      Allows the use of a custom run.json"
+    echo 
     echo "  -u, --user"
     echo "      Uses the run.json available at ${HOME}/run.json"
     echo
@@ -262,6 +265,11 @@ function parse_arguments {
       ;;
     -g|--global)
       LOCS=("${LOCS[2]}")
+      shift
+      ;;
+    -f|--file)
+      shift
+      LOCS=("${1}")
       shift
       ;;
     -e|--environment)
