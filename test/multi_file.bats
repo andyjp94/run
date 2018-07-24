@@ -45,8 +45,8 @@
   cp "./local/_default.json" "${LOC}"
   cp "./home/_default.json" "${BACK_LOC}"
   run ../src/run.sh -l
+  
   [ "$status" -eq 0 ]
-
   [ "${lines[0]}" = "Commands available in ${LOC}:" ]
   [ "${lines[1]}" = "[" ]
   [ "${lines[2]}" = "  {" ]
@@ -54,6 +54,13 @@
   [ "${lines[4]}" = '    "value": "echo \"local: This is the default command\""' ]
   [ "${lines[5]}" = "  }" ]
   [ "${lines[6]}" = "]" ]
+  [ "${lines[7]}" = "Commands available in ${BACK_LOC}:" ]
+  [ "${lines[8]}" = "[" ]
+  [ "${lines[9]}" = "  {" ]
+  [ "${lines[10]}" = '    "name": "default",' ]
+  [ "${lines[11]}" = '    "value": "echo \"home: This is the default command\""' ]
+  [ "${lines[12]}" = "  }" ]
+  [ "${lines[13]}" = "]" ]
 
 }
 
@@ -150,5 +157,8 @@
 function teardown {
   if [ -f "${LOC}" ]; then
     rm "${LOC}"
+  fi
+    if [ -f "${BACK_LOC}" ]; then
+    rm "${BACK_LOC}"
   fi
 }
