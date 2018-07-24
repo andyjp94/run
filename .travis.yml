@@ -4,7 +4,7 @@ services:
   - docker
 
 before_install:
-  - echo 'repo_token\: '"${COVERALLS_TOKEN}" > .coveralls.yml
+  - echo 'repo_token: '"${COVERALLS_TOKEN}" > .coveralls.yml
   - docker build -t bats .
 
 script:
