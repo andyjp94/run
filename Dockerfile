@@ -11,7 +11,7 @@ ADD src /root/src
 ADD test /root/test
 WORKDIR /root/test
 ENV LOC "/root/test/run.json"
+ENV BACK_LOC "/root/run.json"
 
-
-ENTRYPOINT ["/bin/sh", "-c", "./local_runner.bats"]
+ENTRYPOINT ["/bin/sh", "-c"]
 CMD ["./local_runner.bats"]
