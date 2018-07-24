@@ -37,6 +37,26 @@
   [ "$output" = "" ]
 }
 
+@test "List commands when one is available" {
+  cp "./local/_default.json" "${LOC}"
+  run ../src/run.sh -l
+  [ "$status" -eq 0 ]
+
+  [ "${lines[0]}" = "Commands available in ${PWD}/run.json:" ]
+  [ "${lines[1]}" = "[" ]
+  [ "${lines[2]}" = "  {" ]
+  [ "${lines[3]}" = '    "name": "default",' ]
+  [ "${lines[4]}" = '    "value": "echo \"local: This is the default command\""' ]
+  [ "${lines[5]}" = "  }" ]
+  [ "${lines[6]}" = "]" ]
+
+
+  # [ "$output" = "" ]
+}
+
+
+
+
 @test "Set global environment variable for command" {
   cp "./local/_env.json" "${LOC}"
   run ../src/run.sh global
