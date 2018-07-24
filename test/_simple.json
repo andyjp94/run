@@ -1,8 +1,0 @@
-{
-	"commands": [
-        { 
-        "name": "init",
-		"value": "echo \"This is the init command\""
-        }
-    ]
-}
