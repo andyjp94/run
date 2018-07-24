@@ -144,17 +144,16 @@ function main {
  for file in ${LOCS[*]}; do 
     if [ -f "${file}" ]; then
       validate_file "${file}" "${1}"
-      
+
       if find_cmd "$file" "${1}" ; then
+
         create_environment "${file}"
         create_environment_local "$file" "${1}"
         create_path_local "${file}" "${1}"
-        create_path "${file}" 
-
+        create_path "${file}"
         
         setup_command "${CMD}" "TEMP_FILE" "LOG_FILE"
         ENV="${ENV}${LOCAL_ENV}${CLI_ENV}${PATH_CMD}"
-
         run_command
         cleanup
         return 0
@@ -213,6 +212,11 @@ function parse_arguments {
     echo "      Sets an environment variable for the process, this will override"
     echo "      any environment variables specified in the run.json files."
     echo 
+    echo "  -u, --user"
+    echo "      Uses the run.json available at ${HOME}/run.json"
+    echo
+    echo "  -g, --global"
+    echo "      Uses the run.json available at /etc/run/run.json"
     echo "  -q, --quiet"
     echo "      Sends stderr and stdout to the log file alone."
     echo
@@ -251,6 +255,14 @@ function parse_arguments {
     -l|--list)
       list_commands
       exit 0
+      ;;
+    -u|--user)
+      LOCS=("${LOCS[1]}")
+      shift
+      ;;
+    -g|--global)
+      LOCS=("${LOCS[2]}")
+      shift
       ;;
     -e|--environment)
       shift

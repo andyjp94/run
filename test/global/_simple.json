@@ -1,0 +1,8 @@
+{
+	"commands": [
+        { 
+        "name": "init",
+		"value": "echo \"global: This is the init command\""
+        }
+    ]
+}
