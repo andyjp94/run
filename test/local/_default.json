@@ -1,0 +1,7 @@
+{
+	"commands": [
+        { "name": "default",
+		"value": "echo \"local: This is the default command\""
+        }
+    ]
+}
