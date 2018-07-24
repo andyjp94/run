@@ -3,7 +3,8 @@ FROM ubuntu:16.04
 RUN apt update && apt install -y jq shellcheck git &&\
     git clone https://github.com/bats-core/bats-core.git &&\
     cd bats-core &&\
-    ./install.sh /usr/local 
+    ./install.sh /usr/local &&\
+    mkdir /etc/run
     
 
 ADD src /root/src
