@@ -10,4 +10,4 @@ before_install:
 script:
   - docker run bats
   - docker run -e LOC=/root/run.json bats
-  - docker run -e LOC=/opt/run/run.json bats
+  - docker run -e LOC=/etc/run/run.json bats
