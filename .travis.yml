@@ -11,5 +11,5 @@ script:
   - docker run bats
   - docker run -e LOC=/root/run.json bats
   - docker run -e LOC=/etc/run/run.json bats
-  - docker run -e BACK_LOCL=/root/run.json bats "./multi_file.bats"
+  - docker run -e BACK_LOC=/root/run.json bats "./multi_file.bats"
   - docker run -e BACK_LOC=/etc/run/run.json -e LOC=/root/run.json bats "./multi_file.bats"
