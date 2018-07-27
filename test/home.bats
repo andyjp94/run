@@ -312,6 +312,8 @@ EOF
   test_json="/tmp/test.json"
 
     [ "$status" -eq 0 ]
+  
+
 
     cat << EOF > "${test_json}"
 {
@@ -345,9 +347,56 @@ EOF
 
 }
 
+@test "init does not overwrite if flag is not set" {
+
+  cp "./local/_env.json" "./run.json"
+
+  run ../src/run.sh -i -wd
+
+  [ "$status" -eq 1 ]
+  
+  [ "$lines" = "${PWD}/run.json already exists. To overwrite use the -o flag." ]
+}
+
+@test "init does overwrite file if flag is set" {
+
+  cp "./local/_env.json" "./run.json"
+
+  run ../src/run.sh -i -wd -o
+
+  [ "$status" -eq 0 ]
+
+    test_json="/tmp/test.json"
+
+    cat << EOF > "${test_json}"
+{
+	"command": [{
+		"name": "default",
+		"value": "echo \"This is the default command\"",
+		"env": [{
+			"name": "local_env",
+			"value": "true"
+		}],
+		"path": ["/usr/sbin"]
+	}],
+	"env": [{
+		"name": "global_env",
+		"value": "true"
+	}],
+	"path": [
+		"/usr/local/bin"
+	]
+}
+EOF
+
+  diff "${test_json}" "./run.json"
+   [ "$?" = "0" ]
+
+}
+
 
 function teardown {
-    for file in "./run.json" "${HOME}/run.json" "/etc/run/run.json"; do
+    for file in "./run.json" "${HOME}/run.json" "/etc/run/run.json" "/tmp/run.json"; do
       if [ -f "${file}" ]; then
         rm ${file}
       fi

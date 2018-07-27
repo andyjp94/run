@@ -48,6 +48,10 @@ Create the run.json in the working directory
 ```
 ./run.sh -wd
 ```
+Overwrite an existing run.json
+```
+./run.sh -u -o
+```
 List all available commands
 ```
 ./run.sh -l

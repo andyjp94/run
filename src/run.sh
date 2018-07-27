@@ -4,7 +4,7 @@
 set -o pipefail
 set -e
 
-VERSION=0.1
+VERSION=0.1.0
 LOCS=("${PWD}/run.json" "${HOME}/run.json" "/etc/run/run.json")
 
 function find_cmd {
@@ -195,8 +195,11 @@ function complete_commands {
 }
 
 function init {
-   for file in ${LOCS[*]}; do 
-    cat << EOF > "${file}"
+   FORCE="${1}"
+
+  for file in ${LOCS[*]}; do 
+    if [ ! -f "$file" ]; then 
+      cat << EOF > "${file}"
 {
 	"command": [{
 		"name": "default",
@@ -216,6 +219,31 @@ function init {
 	]
 }
 EOF
+    elif  [ -f "${file}" ] && [ "${FORCE}" != "" ] ; then
+            cat << EOF > "${file}"
+{
+	"command": [{
+		"name": "default",
+		"value": "echo \"This is the default command\"",
+		"env": [{
+			"name": "local_env",
+			"value": "true"
+		}],
+		"path": ["/usr/sbin"]
+	}],
+	"env": [{
+		"name": "global_env",
+		"value": "true"
+	}],
+	"path": [
+		"/usr/local/bin"
+	]
+}
+EOF
+    else 
+      echo "${file} already exists. To overwrite use the -o flag."
+      exit 1
+    fi
   done
 }
 
@@ -234,6 +262,9 @@ function parse_arguments {
     echo "  -e, --environment-var key=value"
     echo "      Sets an environment variable for the process, this will override"
     echo "      any environment variables specified in the run.json files."
+    echo 
+    echo "  -o, --overwrite"
+    echo "      Allows commands like init to override current files"
     echo 
     echo "  -f, --file filepath"
     echo "      Allows the use of a custom run.json"
@@ -279,6 +310,10 @@ function parse_arguments {
     -h|--help)
       usage
       exit 0
+      ;;
+    -o|--overwrite)
+      OVERWRITE="true"
+      shift
       ;;
     -c|--complete)
       COMPLETE="true"
@@ -336,7 +371,7 @@ function parse_arguments {
   done
 
   if ! [ -z ${INIT} ]; then
-    init
+    init ${OVERWRITE}
     exit 0
   fi
 
