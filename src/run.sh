@@ -410,6 +410,10 @@ function new_main {
 
 }
 
+if ! command -v  "jq" 2&>/dev/null; then
+  echo "jq is not installed, to install visit https://stedolan.github.io/jq/download/"
+fi
+
 new_main "$@"
 
 
