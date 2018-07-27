@@ -1,7 +1,7 @@
 {
 	"commands": [
         { 
-        "name": "init",
+        "command": "init",
 		"value": "echo \"home: This is the init command\""
         }
     ]

@@ -92,7 +92,7 @@
   [ "${lines[0]}" = "Commands available in /etc/run/run.json:" ]
   [ "${lines[1]}" = "[" ]
   [ "${lines[2]}" = "  {" ]
-  [ "${lines[3]}" = '    "name": "default",' ]
+  [ "${lines[3]}" = '    "command": "default",' ]
   [ "${lines[4]}" = '    "value": "echo \"global: This is the default command\""' ]
   [ "${lines[5]}" = "  }" ]
   [ "${lines[6]}" = "]" ]
@@ -109,7 +109,7 @@
   [ "${lines[0]}" = "Commands available in ${HOME}/run.json:" ]
   [ "${lines[1]}" = "[" ]
   [ "${lines[2]}" = "  {" ]
-  [ "${lines[3]}" = '    "name": "default",' ]
+  [ "${lines[3]}" = '    "command": "default",' ]
   [ "${lines[4]}" = '    "value": "echo \"home: This is the default command\""' ]
   [ "${lines[5]}" = "  }" ]
   [ "${lines[6]}" = "]" ]
@@ -127,7 +127,7 @@
   [ "${lines[0]}" = "Commands available in /tmp/run.json:" ]
   [ "${lines[1]}" = "[" ]
   [ "${lines[2]}" = "  {" ]
-  [ "${lines[3]}" = '    "name": "default",' ]
+  [ "${lines[3]}" = '    "command": "default",' ]
   [ "${lines[4]}" = '    "value": "echo \"custom: This is the default command\""' ]
   [ "${lines[5]}" = "  }" ]
   [ "${lines[6]}" = "]" ]
@@ -176,8 +176,8 @@
 
     cat << EOF > "${test_json}"
 {
-	"command": [{
-		"name": "default",
+	"commands": [{
+		"command": "default",
 		"value": "echo \"This is the default command\"",
 		"env": [{
 			"name": "local_env",
@@ -212,8 +212,8 @@ EOF
 
     cat << EOF > "${test_json}"
 {
-	"command": [{
-		"name": "default",
+	"commands": [{
+		"command": "default",
 		"value": "echo \"This is the default command\"",
 		"env": [{
 			"name": "local_env",
@@ -247,8 +247,8 @@ EOF
 
     cat << EOF > "${test_json}"
 {
-	"command": [{
-		"name": "default",
+	"commands": [{
+		"command": "default",
 		"value": "echo \"This is the default command\"",
 		"env": [{
 			"name": "local_env",
@@ -281,8 +281,8 @@ EOF
 
     cat << EOF > "${test_json}"
 {
-	"command": [{
-		"name": "default",
+	"commands": [{
+		"command": "default",
 		"value": "echo \"This is the default command\"",
 		"env": [{
 			"name": "local_env",
@@ -317,8 +317,8 @@ EOF
 
     cat << EOF > "${test_json}"
 {
-	"command": [{
-		"name": "default",
+	"commands": [{
+		"command": "default",
 		"value": "echo \"This is the default command\"",
 		"env": [{
 			"name": "local_env",
@@ -370,8 +370,8 @@ EOF
 
     cat << EOF > "${test_json}"
 {
-	"command": [{
-		"name": "default",
+	"commands": [{
+		"command": "default",
 		"value": "echo \"This is the default command\"",
 		"env": [{
 			"name": "local_env",

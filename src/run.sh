@@ -9,7 +9,7 @@ LOCS=("${PWD}/run.json" "${HOME}/run.json" "/etc/run/run.json")
 
 function find_cmd {
 
-  JSON_CMD=$(jq --arg COMMAND "${2}" '.commands[] | select(.name == $COMMAND)' < "${1}")
+  JSON_CMD=$(jq --arg COMMAND "${2}" '.commands[] | select(.command == $COMMAND)' < "${1}")
   if [ "${JSON_CMD}" != "" ]; then
     CMD="$(echo "${JSON_CMD}" | jq -r '.value')"
     return 0
@@ -26,7 +26,7 @@ function create_environment {
   local env_json=" "
     for index in $( seq 1 "${num}"); do
         env_json=$(jq  --arg INDEX $((index-1)) '.env[$INDEX |tonumber]' < "$RUN_FILE")
-        ENV="${ENV} export $(echo "${env_json}" | jq '.name')=$(echo "${env_json}" | jq '.value');"; 
+        ENV="${ENV} export $(echo "${env_json}" | jq '.command')=$(echo "${env_json}" | jq '.value');"; 
     done
   fi
   
@@ -34,14 +34,14 @@ function create_environment {
 function create_environment_local {
   local RUN_FILE="${1}"
   local env_dict="{}"
-  env_dict=$(jq --arg COMMAND "${2}" '.commands[] | select(.name == $COMMAND) |.env' < "${RUN_FILE}")
+  env_dict=$(jq --arg COMMAND "${2}" '.commands[] | select(.command == $COMMAND) |.env' < "${RUN_FILE}")
   local num=0
   num=$(echo "${env_dict}" | jq 'length')
   if [ "${num}" != "0" ]; then
       local env_json=" "
     for index in $( seq 1 "${num}"); do
         env_json=$(echo "${env_dict}" | jq  --arg INDEX $((index-1)) '.[$INDEX |tonumber]')
-         LOCAL_ENV="${LOCAL_ENV} export $(echo "${env_json}" | jq '.name')=$(echo "${env_json}" | jq '.value');"; 
+         LOCAL_ENV="${LOCAL_ENV} export $(echo "${env_json}" | jq '.command')=$(echo "${env_json}" | jq '.value');"; 
     done
   fi
 }
@@ -49,7 +49,7 @@ function create_path_local {
   PATH_CMD="export PATH=${PATH}:${PROGDIR}"
   local RUN_FILE="${1}"
   local env_dict="{}"
-  path_dict=$(jq --arg COMMAND "${2}" '.commands[] | select(.name == $COMMAND) |.path' < "${RUN_FILE}")
+  path_dict=$(jq --arg COMMAND "${2}" '.commands[] | select(.command == $COMMAND) |.path' < "${RUN_FILE}")
   local num=0
   num=$(echo "${path_dict}" | jq 'length')
   if [ "${num}" != "0" ]; then
@@ -132,7 +132,7 @@ function validate_file {
   local NUM_COMMANDS=""
   local NUM_UNIQUE_COMMANDS=""
   NUM_COMMANDS=$(jq '.commands | length' < "${FILE}")
-  NUM_UNIQUE_COMMANDS=$(jq '.commands | unique_by(.name) | length' < "${FILE}")
+  NUM_UNIQUE_COMMANDS=$(jq '.commands | unique_by(.command) | length' < "${FILE}")
   
 
   if [ "${NUM_COMMANDS}" != "${NUM_UNIQUE_COMMANDS}" ]; then
@@ -180,7 +180,7 @@ function complete_commands {
   local COMMANDS=""
  for file in ${LOCS[*]}; do 
     if [ -f "${file}" ]; then
-     FILE_COMMANDS=$(jq  -r '.commands[] | .name' < "${file}" )
+     FILE_COMMANDS=$(jq  -r '.commands[] | .command' < "${file}" )
      COMMANDS="${COMMANDS} ${FILE_COMMANDS}"
     fi
     done
@@ -201,8 +201,8 @@ function init {
     if [ ! -f "$file" ]; then 
       cat << EOF > "${file}"
 {
-	"command": [{
-		"name": "default",
+	"commands": [{
+		"command": "default",
 		"value": "echo \"This is the default command\"",
 		"env": [{
 			"name": "local_env",
@@ -222,8 +222,8 @@ EOF
     elif  [ -f "${file}" ] && [ "${FORCE}" != "" ] ; then
             cat << EOF > "${file}"
 {
-	"command": [{
-		"name": "default",
+	"commands": [{
+		"command": "default",
 		"value": "echo \"This is the default command\"",
 		"env": [{
 			"name": "local_env",

@@ -1,6 +1,6 @@
 {
 	"commands": [
-        { "name": "default",
+        { "command": "default",
 		"value": "echo \"custom: This is the default command\""
         }
     ]

@@ -12,8 +12,8 @@ This command will look for commands in the following files in the order shown:
 A run.json file with all potential sections should looks like this:
 ```
 {
-	"command": [{
-		"name": "default",
+	"commands": [{
+		"command": "default",
 		"value": "echo \"This is the default command\"",
 		"env": [{
 			"name": "local_env",
