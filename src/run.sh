@@ -8,13 +8,18 @@ VERSION=0.1.0
 LOCS=("${PWD}/run.json" "${HOME}/run.json" "/etc/run/run.json")
 
 function find_cmd {
+  CMD=""
+  CMD=$(jq -r --arg COMMAND "${2}" '.commands[] | select(.command == $COMMAND) | .executes[]' < "${1}" |tr '\n' ';')
 
-  executes=$(jq -r --arg COMMAND "${2}" '.commands[] | select(.command == $COMMAND) | .executes | @sh' < "${1}")
-  executes="${executes//\"\' \'/\";}"
-  executes="${executes%\'}"
-  executes="${executes#\'}"
-  if [ "${executes}" != "" ]; then
-    CMD="${executes}"
+  # if [ "${executes}" != "" ]; then
+  # while read i; do
+  #   echo "yay"
+  #   CMD="${CMD}$(echo $i | tr '\n' ';')"
+
+  #  done < <(jq -r --arg COMMAND "${2}" '.commands[] | select(.command == $COMMAND) | .executes[]' < "${1}")
+  # fi
+
+  if [ "${CMD}" != "" ]; then
     return 0
   else
     return 1 
@@ -160,6 +165,7 @@ function main {
         
 
           setup_command "${CMD}" "TEMP_FILE" "LOG_FILE"
+
           ENV="${ENV}${LOCAL_ENV}${CLI_ENV}${PATH_CMD}"
           run_command
 
@@ -378,6 +384,7 @@ function parse_arguments {
     esac
 
   done
+
 
   if ! [ -z ${INIT} ]; then
     init ${OVERWRITE}
