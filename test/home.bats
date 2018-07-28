@@ -401,6 +401,10 @@ EOF
 
 }
 
+@test "test running an array of commands" {
+  run ../src/run.sh -f test/local/multiple.json
+  [ "$status" -eq 0 ]
+}
 
 function teardown {
     for file in "./run.json" "${HOME}/run.json" "/etc/run/run.json" "/tmp/run.json"; do
