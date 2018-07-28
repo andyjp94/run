@@ -8,9 +8,15 @@ VERSION=0.1.0
 LOCS=("${PWD}/run.json" "${HOME}/run.json" "/etc/run/run.json")
 
 function find_cmd {
+  local file="${1}"
+  local command=${2}
+  local args=${*:3}
   CMD=""
-  CMD=$(jq -r --arg COMMAND "${2}" '.commands[] | select(.command == $COMMAND) | .executes[]' < "${1}" |tr '\n' ';')
+  CMD=$(jq -r --arg COMMAND "${command}" '.commands[] | select(.command == $COMMAND) | .executes[]' < "${file}" |tr '\n' ';')
 
+  if [ "${args}" != "" ]; then
+    CMD="${CMD/%;/ ${args};}"
+  fi
   if [ "${CMD}" != "" ]; then
     return 0
   else
@@ -91,6 +97,7 @@ function cleanup {
 
 function setup_command {
     local CMD="${1}"
+    
     echo -e '#!/bin/bash\nrun() {\n '"${CMD}"'\n}\n run' > "${TEMP_FILE}"
     chmod +x "${TEMP_FILE}"
 }
@@ -141,27 +148,22 @@ function validate_file {
     exit 1
   fi 
 }
-function main {
- for file in ${LOCS[*]}; do 
-              
+function run {
+  local command="${1}"
+  local args=${*:2}
+  for file in ${LOCS[*]}; do 
     if [ -f "${file}" ]; then
-      validate_file "${file}" "${1}"
-
-
-      if find_cmd "$file" "${1}" ; then
-
+      validate_file "${file}" "${command}"
+      if find_cmd "$file" "${command}" "${args}" ; then
         create_environment "${file}"
-        create_environment_local "$file" "${1}"
-        create_path_local "${file}" "${1}"
+        create_environment_local "$file" "${command}"
+        create_path_local "${file}" "${command}"
         create_path "${file}"
-        
+        setup_command "${CMD}" "TEMP_FILE" "LOG_FILE"
+        ENV="${ENV}${LOCAL_ENV}${CLI_ENV}${PATH_CMD}"
+        run_command
 
-          setup_command "${CMD}" "TEMP_FILE" "LOG_FILE"
-
-          ENV="${ENV}${LOCAL_ENV}${CLI_ENV}${PATH_CMD}"
-          run_command
-
-          cleanup
+        cleanup
 
         return 0
       fi
@@ -175,30 +177,30 @@ function list_commands {
   
  for file in ${LOCS[*]}; do 
     if [ -f "${file}" ]; then
-     echo "Commands available in ${file}:"
-     jq  '.commands' < "${file}"
+      echo "Commands available in ${file}:"
+      jq  '.commands' < "${file}"
     fi
 
-    done
+  done
 }
 
 function complete_commands {
   local FILE_COMMANDS=""
   local COMMANDS=""
- for file in ${LOCS[*]}; do 
+  for file in ${LOCS[*]}; do 
     if [ -f "${file}" ]; then
      FILE_COMMANDS=$(jq  -r '.commands[] | .command' < "${file}" )
      COMMANDS="${COMMANDS} ${FILE_COMMANDS}"
     fi
-    done
-    COMMANDS=$(echo "${COMMANDS}" | xargs -n 1 | sort -u )
+  done
+  COMMANDS=$(echo "${COMMANDS}" | xargs -n 1 | sort -u )
 
-    COMP_FILE="${HOME}/run_completions.sh"
-    echo "complete -W ${COMMANDS} run.sh" >  "${COMP_FILE}"
-    echo "The autocomplete configuration files is available at ${COMP_FILE}."
-    echo "To use it simply source it, to source it on login add:"
-    echo "source ${COMP_FILE}"
-    echo "To your .bashrc"
+  COMP_FILE="${HOME}/run_completions.sh"
+  echo "complete -W ${COMMANDS} run.sh" >  "${COMP_FILE}"
+  echo "The autocomplete configuration files is available at ${COMP_FILE}."
+  echo "To use it simply source it, to source it on login add:"
+  echo "source ${COMP_FILE}"
+  echo "To your .bashrc"
 }
 
 function init {
@@ -365,10 +367,10 @@ function parse_arguments {
       echo "${VERSION}"
       exit 0
       ;;
-    -*)
-      echo "Invalid option '$1'. Use --help to see the valid options" >&2
-      exit 1
-      ;;
+    # -*)
+    #   echo "Invalid option '$1'. Use --help to see the valid options" >&2
+    #   exit 1
+    #   ;;
     # an option argument, continue
     *)  
       break
@@ -399,7 +401,7 @@ function parse_arguments {
 }
 
 
-function new_main {
+function main {
   parse_arguments "${@}"
   TEMP_FILE=$(mktemp /tmp/run.XXXXXXXX)
   LOG_FILE=$(mktemp /tmp/run.XXXXXXXX)
@@ -407,22 +409,37 @@ function new_main {
   
 
   if [ -z "${cmds[0]}" ]; then
-     main "default"
-     exit 0
-  fi
-  
+    run "default"
+  elif [ "${cmds[0]}" = "--" ]; then
+    run "default" "${cmds[@]:1}"
+  else
+    x=0
+    CLI_ARGS=""
+    for cmd in "${cmds[@]}"; do
+      x=$((x+1))
+      if [ "${cmds[${x}]}" = "--" ]; then
+        y=$((x+1))
+        CLI_ARGS="${cmds[*]:${y}}"
+      fi
 
-  for cmd in "${cmds[@]}"; do
-    main "${cmd}"
-  done
+      run "${cmd}" "${CLI_ARGS}"
+      if [ "${CLI_ARGS}" != "" ]; then
+        break
+      fi
+    done
+  fi
+
+  exit 0
 
 }
+
+
 
 if ! command -v  "jq" 2&>/dev/null; then
   echo "jq is not installed, to install visit https://stedolan.github.io/jq/download/"
 fi
 
-new_main "$@"
+main "$@"
 
 
 

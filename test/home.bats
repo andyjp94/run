@@ -402,8 +402,27 @@ EOF
 }
 
 @test "test running an array of commands" {
-  run ../src/run.sh -f test/local/multiple.json
+  cp "local/_multiple.json" "./run.json"
+  run ../src/run.sh
+  echo 
+  [ "${lines[0]}" = "local: This is the first command" ]
+  [ "${lines[1]}" = "local: This is the second command" ]
   [ "$status" -eq 0 ]
+}
+
+@test "test adding optional arguments without specifying command" {
+  cp "./local/_default.json" "./run.json"
+  run ../src/run.sh "--" "a"
+  [ "$status" -eq 0 ]
+  [ "$lines" = "local: This is the default command a" ]
+}
+
+@test "test adding optional arguments" {
+  cp "./local/_env.json" "./run.json"
+  run ../src/run.sh "local" "--" ",yay"
+
+  [ "$status" -eq 0 ]
+  [ "$lines" = "local: Setting env in command works ,yay" ]
 }
 
 function teardown {
