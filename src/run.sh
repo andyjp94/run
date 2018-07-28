@@ -11,14 +11,6 @@ function find_cmd {
   CMD=""
   CMD=$(jq -r --arg COMMAND "${2}" '.commands[] | select(.command == $COMMAND) | .executes[]' < "${1}" |tr '\n' ';')
 
-  # if [ "${executes}" != "" ]; then
-  # while read i; do
-  #   echo "yay"
-  #   CMD="${CMD}$(echo $i | tr '\n' ';')"
-
-  #  done < <(jq -r --arg COMMAND "${2}" '.commands[] | select(.command == $COMMAND) | .executes[]' < "${1}")
-  # fi
-
   if [ "${CMD}" != "" ]; then
     return 0
   else
