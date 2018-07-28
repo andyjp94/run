@@ -9,9 +9,12 @@ LOCS=("${PWD}/run.json" "${HOME}/run.json" "/etc/run/run.json")
 
 function find_cmd {
 
-  JSON_CMD=$(jq --arg COMMAND "${2}" '.commands[] | select(.command == $COMMAND)' < "${1}")
-  if [ "${JSON_CMD}" != "" ]; then
-    CMD="$(echo "${JSON_CMD}" | jq -r '.value')"
+  executes=$(jq -r --arg COMMAND "${2}" '.commands[] | select(.command == $COMMAND) | .executes | @sh' < "${1}")
+  executes="${executes//\"\' \'/\";}"
+  executes="${executes%\'}"
+  executes="${executes#\'}"
+  if [ "${executes}" != "" ]; then
+    CMD="${executes}"
     return 0
   else
     return 1 
@@ -26,7 +29,7 @@ function create_environment {
   local env_json=" "
     for index in $( seq 1 "${num}"); do
         env_json=$(jq  --arg INDEX $((index-1)) '.env[$INDEX |tonumber]' < "$RUN_FILE")
-        ENV="${ENV} export $(echo "${env_json}" | jq '.command')=$(echo "${env_json}" | jq '.value');"; 
+        ENV="${ENV} export $(echo "${env_json}" | jq '.name')=$(echo "${env_json}" | jq '.value');"; 
     done
   fi
   
@@ -41,7 +44,7 @@ function create_environment_local {
       local env_json=" "
     for index in $( seq 1 "${num}"); do
         env_json=$(echo "${env_dict}" | jq  --arg INDEX $((index-1)) '.[$INDEX |tonumber]')
-         LOCAL_ENV="${LOCAL_ENV} export $(echo "${env_json}" | jq '.command')=$(echo "${env_json}" | jq '.value');"; 
+         LOCAL_ENV="${LOCAL_ENV} export $(echo "${env_json}" | jq '.name')=$(echo "${env_json}" | jq '.value');"; 
     done
   fi
 }
@@ -105,6 +108,7 @@ function error_handling {
 }
 
 function run_command {
+
   trap command_error_handling EXIT
   if [ -n "${QUIET}" ];then
     sh -c "${ENV} ${TEMP_FILE}" 2&> "${LOG_FILE}"
@@ -142,8 +146,10 @@ function validate_file {
 }
 function main {
  for file in ${LOCS[*]}; do 
+              
     if [ -f "${file}" ]; then
       validate_file "${file}" "${1}"
+
 
       if find_cmd "$file" "${1}" ; then
 
@@ -152,10 +158,13 @@ function main {
         create_path_local "${file}" "${1}"
         create_path "${file}"
         
-        setup_command "${CMD}" "TEMP_FILE" "LOG_FILE"
-        ENV="${ENV}${LOCAL_ENV}${CLI_ENV}${PATH_CMD}"
-        run_command
-        cleanup
+
+          setup_command "${CMD}" "TEMP_FILE" "LOG_FILE"
+          ENV="${ENV}${LOCAL_ENV}${CLI_ENV}${PATH_CMD}"
+          run_command
+
+          cleanup
+
         return 0
       fi
     fi
@@ -203,7 +212,7 @@ function init {
 {
 	"commands": [{
 		"command": "default",
-		"value": "echo \"This is the default command\"",
+		"executes": ["echo \"This is the default command\""],
 		"env": [{
 			"name": "local_env",
 			"value": "true"
@@ -224,7 +233,7 @@ EOF
 {
 	"commands": [{
 		"command": "default",
-		"value": "echo \"This is the default command\"",
+		"executes": ["echo \"This is the default command\""],
 		"env": [{
 			"name": "local_env",
 			"value": "true"

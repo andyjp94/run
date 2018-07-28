@@ -93,9 +93,11 @@
   [ "${lines[1]}" = "[" ]
   [ "${lines[2]}" = "  {" ]
   [ "${lines[3]}" = '    "command": "default",' ]
-  [ "${lines[4]}" = '    "value": "echo \"global: This is the default command\""' ]
-  [ "${lines[5]}" = "  }" ]
-  [ "${lines[6]}" = "]" ]
+  [ "${lines[4]}" = '    "executes": [' ]
+  [ "${lines[5]}" = '      "echo \"global: This is the default command\""' ]
+  [ "${lines[6]}" = '    ]' ]
+  [ "${lines[7]}" = "  }" ]
+  [ "${lines[8]}" = "]" ]
  
 }
 
@@ -106,13 +108,16 @@
   run ../src/run.sh -l -u
 
   [ "$status" -eq 0 ]
-  [ "${lines[0]}" = "Commands available in ${HOME}/run.json:" ]
+  echo "${lines[0]}"
+  [ "${lines[0]}" = "Commands available in /root/run.json:" ]
   [ "${lines[1]}" = "[" ]
   [ "${lines[2]}" = "  {" ]
   [ "${lines[3]}" = '    "command": "default",' ]
-  [ "${lines[4]}" = '    "value": "echo \"home: This is the default command\""' ]
-  [ "${lines[5]}" = "  }" ]
-  [ "${lines[6]}" = "]" ]
+  [ "${lines[4]}" = '    "executes": [' ]
+  [ "${lines[5]}" = '      "echo \"home: This is the default command\""' ]
+  [ "${lines[6]}" = '    ]' ]
+  [ "${lines[7]}" = "  }" ]
+  [ "${lines[8]}" = "]" ]
  
 }
 
@@ -128,9 +133,11 @@
   [ "${lines[1]}" = "[" ]
   [ "${lines[2]}" = "  {" ]
   [ "${lines[3]}" = '    "command": "default",' ]
-  [ "${lines[4]}" = '    "value": "echo \"custom: This is the default command\""' ]
-  [ "${lines[5]}" = "  }" ]
-  [ "${lines[6]}" = "]" ]
+  [ "${lines[4]}" = '    "executes": [' ]
+  [ "${lines[5]}" = '      "echo \"custom: This is the default command\""' ]
+  [ "${lines[6]}" = '    ]' ]
+  [ "${lines[7]}" = "  }" ]
+  [ "${lines[8]}" = "]" ]
  
 }
 
@@ -178,7 +185,7 @@
 {
 	"commands": [{
 		"command": "default",
-		"value": "echo \"This is the default command\"",
+		"executes": ["echo \"This is the default command\""],
 		"env": [{
 			"name": "local_env",
 			"value": "true"
@@ -214,7 +221,7 @@ EOF
 {
 	"commands": [{
 		"command": "default",
-		"value": "echo \"This is the default command\"",
+		"executes": ["echo \"This is the default command\""],
 		"env": [{
 			"name": "local_env",
 			"value": "true"
@@ -249,7 +256,7 @@ EOF
 {
 	"commands": [{
 		"command": "default",
-		"value": "echo \"This is the default command\"",
+		"executes": ["echo \"This is the default command\""],
 		"env": [{
 			"name": "local_env",
 			"value": "true"
@@ -283,7 +290,7 @@ EOF
 {
 	"commands": [{
 		"command": "default",
-		"value": "echo \"This is the default command\"",
+		"executes": ["echo \"This is the default command\""],
 		"env": [{
 			"name": "local_env",
 			"value": "true"
@@ -319,7 +326,7 @@ EOF
 {
 	"commands": [{
 		"command": "default",
-		"value": "echo \"This is the default command\"",
+		"executes": ["echo \"This is the default command\""],
 		"env": [{
 			"name": "local_env",
 			"value": "true"
@@ -372,7 +379,7 @@ EOF
 {
 	"commands": [{
 		"command": "default",
-		"value": "echo \"This is the default command\"",
+		"executes": ["echo \"This is the default command\""],
 		"env": [{
 			"name": "local_env",
 			"value": "true"

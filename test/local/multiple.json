@@ -1,0 +1,7 @@
+{
+	"commands": [
+        { "command": "default",
+            "executes": ["echo \"local: This is the first command\"", "echo \"local: This is the second command\""]
+        }
+    ]
+}

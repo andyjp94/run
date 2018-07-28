@@ -14,7 +14,7 @@ A run.json file with all potential sections should looks like this:
 {
 	"commands": [{
 		"command": "default",
-		"value": "echo \"This is the default command\"",
+		"executes": ["echo \"This is the default command\""],
 		"env": [{
 			"name": "local_env",
 			"value": "true"

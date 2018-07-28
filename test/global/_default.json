@@ -1,7 +1,7 @@
 {
 	"commands": [
         { "command": "default",
-		"value": "echo \"global: This is the default command\""
+		"executes": ["echo \"global: This is the default command\""]
         }
     ]
 }

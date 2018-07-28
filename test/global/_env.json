@@ -1,7 +1,7 @@
 {
 	"commands": [{
 		"command": "local",
-		"value": "echo \"global: Setting env in command ${CUSTOM_ENV}\"",
+		"executes": ["echo \"global: Setting env in command ${CUSTOM_ENV}\""],
 		"env": [{
 			"name": "CUSTOM_ENV",
 			"value": "works"
@@ -9,15 +9,15 @@
     },
      {
         "command": "cli",
-		"value": "echo \"global: Setting env in command ${CUSTOM_ENV}\""
+		"executes": ["echo \"global: Setting env in command ${CUSTOM_ENV}\""]
 	 },
 	 {
         "command": "multiple_cli",
-		"value": "echo \"global: Setting env in command ${CUSTOM_ENV}, ${OTHER_CUSTOM_ENV}\""
+		"executes": ["echo \"global: Setting env in command ${CUSTOM_ENV}, ${OTHER_CUSTOM_ENV}\""]
      },
      {
         "command": "global",
-		"value": "echo \"global: Setting env in command ${GLOBAL_ENV}\""
+		"executes": ["echo \"global: Setting env in command ${GLOBAL_ENV}\""]
      }],
 	"env": [{
 		"name": "GLOBAL_ENV",

@@ -45,10 +45,12 @@
   [ "${lines[0]}" = "Commands available in ${LOC}:" ]
   [ "${lines[1]}" = "[" ]
   [ "${lines[2]}" = "  {" ]
-  [ "${lines[3]}" = '    "name": "default",' ]
-  [ "${lines[4]}" = '    "value": "echo \"local: This is the default command\""' ]
-  [ "${lines[5]}" = "  }" ]
-  [ "${lines[6]}" = "]" ]
+  [ "${lines[3]}" = '    "command": "default",' ]
+  [ "${lines[4]}" = '    "executes": [' ]
+  [ "${lines[5]}" = '      "echo \"local: This is the default command\""' ]
+  [ "${lines[6]}" = "    ]" ]
+  [ "${lines[7]}" = "  }" ]
+  [ "${lines[8]}" = "]" ]
 
 }
 
@@ -56,6 +58,7 @@
 @test "Set global environment variable for command" {
   cp "./local/_env.json" "${LOC}"
   run ../src/run.sh global
+  echo ${output}
   [ "$status" -eq 0 ]
   [ "$output" = "local: Setting env in command works" ]
 }

@@ -2,7 +2,7 @@
 	"commands": [
         { 
         "command": "init",
-		"value": "echo \"local: This is the init command\""
+		"executes": ["echo \"local: This is the init command\""]
         }
     ]
 }

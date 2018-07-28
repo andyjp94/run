@@ -41,26 +41,32 @@
   [ "$output" = "" ]
 }
 
-@test "List commands when one is available" {
+@test "List commands across multiple files is available" {
   cp "./local/_default.json" "${LOC}"
   cp "./home/_default.json" "${BACK_LOC}"
   run ../src/run.sh -l
   
   [ "$status" -eq 0 ]
+  echo "${lines[7]}"
+
   [ "${lines[0]}" = "Commands available in ${LOC}:" ]
   [ "${lines[1]}" = "[" ]
   [ "${lines[2]}" = "  {" ]
-  [ "${lines[3]}" = '    "name": "default",' ]
-  [ "${lines[4]}" = '    "value": "echo \"local: This is the default command\""' ]
-  [ "${lines[5]}" = "  }" ]
-  [ "${lines[6]}" = "]" ]
-  [ "${lines[7]}" = "Commands available in ${BACK_LOC}:" ]
-  [ "${lines[8]}" = "[" ]
-  [ "${lines[9]}" = "  {" ]
-  [ "${lines[10]}" = '    "name": "default",' ]
-  [ "${lines[11]}" = '    "value": "echo \"home: This is the default command\""' ]
-  [ "${lines[12]}" = "  }" ]
-  [ "${lines[13]}" = "]" ]
+  [ "${lines[3]}" = '    "command": "default",' ]
+  [ "${lines[4]}" = '    "executes": [' ]
+  [ "${lines[5]}" = '      "echo \"local: This is the default command\""' ]
+  [ "${lines[6]}" = '    ]' ]
+  [ "${lines[7]}" = "  }" ]
+  [ "${lines[8]}" = "]" ]
+  [ "${lines[9]}" = "Commands available in ${BACK_LOC}:" ]
+  [ "${lines[10]}" = "[" ]
+  [ "${lines[11]}" = "  {" ]
+  [ "${lines[12]}" = '    "command": "default",' ]
+  [ "${lines[13]}" = '    "executes": [' ]
+  [ "${lines[14]}" = '      "echo \"home: This is the default command\""' ]
+  [ "${lines[15]}"  = '    ]' ]
+  [ "${lines[16]}" = "  }" ]
+  [ "${lines[17]}" = "]" ]
 
 }
 
