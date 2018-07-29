@@ -7,6 +7,22 @@ set -e
 VERSION=0.1.0
 LOCS=("${PWD}/run.json" "${HOME}/run.json" "/etc/run/run.json")
 
+function find_watch {
+  local file="${1}"
+  local command=${2}
+  local x
+  if [ "$(jq -r --arg COMMAND "${command}" '.commands[] | select(.command == $COMMAND) | .watches' < "${file}")" != "null" ]; then
+    x=$(jq -r --arg COMMAND "${command}" '.commands[] | select(.command == $COMMAND) | .watches[]' < "${file}" |tr '\n' ' ')
+
+  elif [ "$(jq '.watches' < "${file}" )" != "null" ]; then
+    x=$(jq '.watches[]' < "${file}" | tr '\n' ' ')
+  fi
+
+  if [ "${x}" != "" ]; then
+    watch=${x}
+  fi
+}
+
 function find_cmd {
   local file="${1}"
   local command=${2}
@@ -14,9 +30,11 @@ function find_cmd {
   CMD=""
   CMD=$(jq -r --arg COMMAND "${command}" '.commands[] | select(.command == $COMMAND) | .executes[]' < "${file}" |tr '\n' ';')
 
+
   if [ "${args}" != "" ]; then
     CMD="${CMD/%;/ ${args};}"
   fi
+
   if [ "${CMD}" != "" ]; then
     return 0
   else
@@ -96,9 +114,56 @@ function cleanup {
 
 
 function setup_command {
-    local CMD="${1}"
-    
-    echo -e '#!/bin/bash\nrun() {\n '"${CMD}"'\n}\n run' > "${TEMP_FILE}"
+  local CMD="${1}"
+  if [ ! -z "${watch}" ]; then
+  cat << EOF > "${TEMP_FILE}"
+#!/bin/bash
+
+
+function watch {
+    COMMAND=\${*:2}
+    chsum1=""
+    START_UP="true"
+
+    while [[ true ]]
+    do
+        chsum2=\$(md5 \${1})
+        if [[ \$chsum1 != \$chsum2 ]]; then
+            if [ "\${START_UP}" != "true" ]; then
+                echo "Found a file change, executing..."
+                sh -c "\$COMMAND"
+                chsum1=\$chsum2
+            else
+              echo "starting up..."
+              echo "Press Ctrl+C to exit"
+              chsum1=\$chsum2
+            fi
+        fi
+        START_UP="false"
+        sleep 1
+    done
+}
+
+function main { 
+  for file in \${1}; do
+    echo "watching \${file}"
+  done
+  watch "\${1}" "\${*:2}"
+}
+
+main "\${1}" "${CMD}"
+EOF
+  else
+    cat << EOF > "${TEMP_FILE}"
+#!/bin/bash
+
+function run { 
+  ${CMD}
+}
+
+run
+EOF
+  fi
     chmod +x "${TEMP_FILE}"
 }
 
@@ -114,16 +179,25 @@ function error_handling {
 function run_command {
 
   trap command_error_handling EXIT
+
   if [ -n "${QUIET}" ];then
-    sh -c "${ENV} ${TEMP_FILE}" 2&> "${LOG_FILE}"
+    sh -c "${ENV} ${TEMP_FILE} \"${watch}\""  2&> "${LOG_FILE}"
   else
-    sh -c "${ENV} ${TEMP_FILE}" | tee "${LOG_FILE}"
+    sh -c "${ENV} ${TEMP_FILE} \"${watch}\"" | tee "${LOG_FILE}"
   fi
 }
 
 function command_error_handling {
   error=$?
-  if [ "$error" -ne "0" ]; then
+
+  #This is for when the user kills it, this will hopefully only be necessary when 
+  #watching files
+  if [ "${error}" -eq "130" ]; then
+    echo ""
+    echo "exiting..."
+    error=0
+
+  elif [ "$error" -ne "0" ]; then
     mv "${TEMP_FILE}" "${PWD}"/run.failed
     mv "${LOG_FILE}" "${PWD}"/run.log
     echo "The command failed. The script that was attempted is now available at ${PWD}/run.failed"
@@ -154,7 +228,10 @@ function run {
   for file in ${LOCS[*]}; do 
     if [ -f "${file}" ]; then
       validate_file "${file}" "${command}"
-      if find_cmd "$file" "${command}" "${args}" ; then
+      if [ -z "${watch}" ]; then
+        find_watch "${file}" "${command}"
+      fi
+      if find_cmd "${file}" "${command}" "${args}" ; then
         create_environment "${file}"
         create_environment_local "$file" "${command}"
         create_path_local "${file}" "${command}"
@@ -205,20 +282,22 @@ function complete_commands {
 
 function init {
    FORCE="${1}"
-
   for file in ${LOCS[*]}; do 
     if [ ! -f "$file" ]; then 
-      cat << EOF > "${file}"
+      # cat << EOF > "${file}"
+      jq '.' <<EOF > "${file}" 
 {
 	"commands": [{
 		"command": "default",
 		"executes": ["echo \"This is the default command\""],
+    "watches": [],
 		"env": [{
 			"name": "local_env",
 			"value": "true"
 		}],
 		"path": ["/usr/sbin"]
 	}],
+  "watches": [],
 	"env": [{
 		"name": "global_env",
 		"value": "true"
@@ -229,17 +308,19 @@ function init {
 }
 EOF
     elif  [ -f "${file}" ] && [ "${FORCE}" != "" ] ; then
-            cat << EOF > "${file}"
+      jq '.' <<EOF > "${file}" 
 {
 	"commands": [{
 		"command": "default",
 		"executes": ["echo \"This is the default command\""],
+    "watches": [],
 		"env": [{
 			"name": "local_env",
 			"value": "true"
 		}],
 		"path": ["/usr/sbin"]
 	}],
+  "watches": [],
 	"env": [{
 		"name": "global_env",
 		"value": "true"
@@ -254,7 +335,9 @@ EOF
       exit 1
     fi
   done
+
 }
+
 
 function parse_arguments {
 
@@ -277,6 +360,10 @@ function parse_arguments {
     echo 
     echo "  -f, --file filepath"
     echo "      Allows the use of a custom run.json"
+    echo 
+    echo 
+    echo "  -w, --watch filepath..."
+    echo "      Run the command when the watched files change"
     echo 
     echo "  -i, --init []"
     echo "      Create a default run.json in any or all locations"
@@ -322,6 +409,11 @@ function parse_arguments {
       ;;
     -o|--overwrite)
       OVERWRITE="true"
+      shift
+      ;;
+    -w| --watch)
+      shift
+      watch="${1}"
       shift
       ;;
     -c|--complete)
@@ -406,6 +498,7 @@ function main {
   TEMP_FILE=$(mktemp /tmp/run.XXXXXXXX)
   LOG_FILE=$(mktemp /tmp/run.XXXXXXXX)
   trap error_handling EXIT
+
   
 
   if [ -z "${cmds[0]}" ]; then
@@ -433,19 +526,8 @@ function main {
 
 }
 
-
-
 if ! command -v  "jq" 2&>/dev/null; then
   echo "jq is not installed, to install visit https://stedolan.github.io/jq/download/"
 fi
 
 main "$@"
-
-
-
-
-
-
-
-
-

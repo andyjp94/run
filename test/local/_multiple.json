@@ -1,7 +1,7 @@
 {
 	"commands": [
         { "command": "default",
-            "executes": ["echo \"local: This is the first command\"", "echo \"local: This is the second command\"", "touch /tmp/jlkjklj.txt", "rm /tmp/jlkjklj.txt"]
+            "executes": ["echo \"local: This is the first command\"", "echo \"local: This is the second command\"", "echo \"a\" >/tmp/jlkjklj.txt", "cat /tmp/jlkjklj.txt"]
         }
     ]
 }

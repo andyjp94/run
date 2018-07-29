@@ -17,6 +17,7 @@
   cp "./home/_default.json" "${HOME}/run.json"
   cp "./global/_default.json" "/etc/run/run.json"
 
+
   run ../src/run.sh --user 
 
   [ "$status" -eq 0 ]
@@ -27,6 +28,9 @@
   cp "./local/_default.json" "./run.json"
   cp "./home/_default.json" "${HOME}/run.json"
   cp "./global/_default.json" "/etc/run/run.json"
+
+
+
 
   run ../src/run.sh -u
 
@@ -181,17 +185,19 @@
 
     [ "$status" -eq 0 ]
 
-    cat << EOF > "${test_json}"
+    jq '.' << EOF > "${test_json}"
 {
 	"commands": [{
 		"command": "default",
 		"executes": ["echo \"This is the default command\""],
+    "watches": [],
 		"env": [{
 			"name": "local_env",
 			"value": "true"
 		}],
 		"path": ["/usr/sbin"]
 	}],
+  "watches": [],
 	"env": [{
 		"name": "global_env",
 		"value": "true"
@@ -217,17 +223,19 @@ EOF
 
     [ "$status" -eq 0 ]
 
-    cat << EOF > "${test_json}"
+    jq '.' << EOF > "${test_json}"
 {
 	"commands": [{
 		"command": "default",
 		"executes": ["echo \"This is the default command\""],
+    "watches": [],
 		"env": [{
 			"name": "local_env",
 			"value": "true"
 		}],
 		"path": ["/usr/sbin"]
 	}],
+  "watches": [],
 	"env": [{
 		"name": "global_env",
 		"value": "true"
@@ -252,17 +260,19 @@ EOF
 
     [ "$status" -eq 0 ]
 
-    cat << EOF > "${test_json}"
+    jq '.' << EOF > "${test_json}"
 {
 	"commands": [{
 		"command": "default",
 		"executes": ["echo \"This is the default command\""],
+    "watches": [],
 		"env": [{
 			"name": "local_env",
 			"value": "true"
 		}],
 		"path": ["/usr/sbin"]
 	}],
+  "watches": [],
 	"env": [{
 		"name": "global_env",
 		"value": "true"
@@ -286,17 +296,19 @@ EOF
 
     [ "$status" -eq 0 ]
 
-    cat << EOF > "${test_json}"
+    jq '.' << EOF > "${test_json}"
 {
 	"commands": [{
 		"command": "default",
 		"executes": ["echo \"This is the default command\""],
+    "watches": [],
 		"env": [{
 			"name": "local_env",
 			"value": "true"
 		}],
 		"path": ["/usr/sbin"]
 	}],
+  "watches": [],
 	"env": [{
 		"name": "global_env",
 		"value": "true"
@@ -322,17 +334,19 @@ EOF
   
 
 
-    cat << EOF > "${test_json}"
+    jq '.' << EOF > "${test_json}"
 {
 	"commands": [{
 		"command": "default",
 		"executes": ["echo \"This is the default command\""],
+    "watches": [],
 		"env": [{
 			"name": "local_env",
 			"value": "true"
 		}],
 		"path": ["/usr/sbin"]
 	}],
+  "watches": [],
 	"env": [{
 		"name": "global_env",
 		"value": "true"
@@ -375,17 +389,19 @@ EOF
 
     test_json="/tmp/test.json"
 
-    cat << EOF > "${test_json}"
+    jq '.' << EOF > "${test_json}"
 {
 	"commands": [{
 		"command": "default",
 		"executes": ["echo \"This is the default command\""],
+    "watches": [],
 		"env": [{
 			"name": "local_env",
 			"value": "true"
 		}],
 		"path": ["/usr/sbin"]
 	}],
+  "watches": [],
 	"env": [{
 		"name": "global_env",
 		"value": "true"
@@ -407,6 +423,7 @@ EOF
   echo 
   [ "${lines[0]}" = "local: This is the first command" ]
   [ "${lines[1]}" = "local: This is the second command" ]
+  [ "${lines[2]}" = "a" ]
   [ "$status" -eq 0 ]
 }
 
