@@ -147,6 +147,11 @@ function watch {
 function main { 
   for file in \${1}; do
     echo "watching \${file}"
+    if [ ! -f \${file} ]; then
+      echo "\${file} does not exist"
+      echo "exiting..."
+      exit 1
+    fi
   done
   watch "\${1}" "\${*:2}"
 }
