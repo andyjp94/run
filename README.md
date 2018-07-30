@@ -12,23 +12,35 @@ This command will look for commands in the following files in the order shown:
 A run.json file with all potential sections should looks like this:
 ```
 {
-	"commands": [{
-		"command": "default",
-		"executes": ["echo \"This is the default command\""],
-		"env": [{
-			"name": "local_env",
-			"value": "true"
-		}],
-		"path": ["/usr/sbin"]
-	}],
-	"env": [{
-		"name": "global_env",
-		"value": "true"
-	}],
-	"path": [
-		"/usr/local/bin"
-	]
-}   
+  "commands": [
+    {
+      "command": "default",
+      "executes": [
+        "echo \"This is the default command\""
+      ],
+      "watches": [],
+      "env": [
+        {
+          "name": "local_env",
+          "value": "true"
+        }
+      ],
+      "path": [
+        "/usr/sbin"
+      ]
+    }
+  ],
+  "watches": [],
+  "env": [
+    {
+      "name": "global_env",
+      "value": "true"
+    }
+  ],
+  "path": [
+    "/usr/local/bin"
+  ]
+}
 ```
 
 ## How To:
