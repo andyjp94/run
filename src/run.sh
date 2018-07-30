@@ -156,7 +156,7 @@ function main {
   watch "\${1}" "\${*:2}"
 }
 
-main "\${1}" "${CMD}"
+main "${watch}" "${CMD}"
 EOF
   else
     cat << EOF > "${TEMP_FILE}"
@@ -186,9 +186,10 @@ function run_command {
   trap command_error_handling EXIT
 
   if [ -n "${QUIET}" ];then
-    sh -c "${ENV} ${TEMP_FILE} \"${watch}\""  2&> "${LOG_FILE}"
+    sh -c "${ENV} ${TEMP_FILE}"  2&> "${LOG_FILE} "
   else
-    sh -c "${ENV} ${TEMP_FILE} \"${watch}\"" | tee "${LOG_FILE}"
+    sh -c "${ENV} ${TEMP_FILE}" | tee "${LOG_FILE}"
+
   fi
 }
 
