@@ -131,12 +131,26 @@ function watch {
         if [[ \$chsum1 != \$chsum2 ]]; then
             if [ "\${START_UP}" != "true" ]; then
                 echo "Found a file change, executing..."
-                sh -c "\$COMMAND"
+                if [ "\${background}" != "" ]; then
+                  if [ "\${previous}" != "" ]; then 
+                    kill \${previous}
+                  fi
+                fi
+                sh -c "\$COMMAND" \${background}
+                previous=\$!
                 chsum1=\$chsum2
             else
               echo "starting up..."
               echo "Press Ctrl+C to exit"
               chsum1=\$chsum2
+              if [ "\${background}" != "" ]; then
+                  if [ "\${previous}" != "" ]; then 
+                    kill \${previous}
+                  fi
+                fi
+                sh -c "\$COMMAND" \${background}
+                previous=\$!
+               
             fi
         fi
         START_UP="false"
@@ -155,6 +169,12 @@ function main {
   done
   watch "\${1}" "\${*:2}"
 }
+
+if [ "${BACKGROUND}" != "" ]; then
+  background="&"
+  previous=""
+fi
+
 
 main "${watch}" "${CMD}"
 EOF
@@ -388,6 +408,11 @@ function parse_arguments {
     echo "  -l, --list <file>"
     echo "      List the available commands, these are gathered from: ${LOCS[*]}"
     echo
+    echo
+    echo "  -b, --background <file>"
+    echo "      Run the command in the background, if used in conjunction with watching then"
+    echo "      on a file change the previous command will be killed."
+    echo
     echo "  -v, --version"
     echo "      Prints the version of the command."
     echo
@@ -438,7 +463,10 @@ function parse_arguments {
       LOCS=("${LOCS[0]}")
       shift
       ;;
-
+    -b|--background)
+      BACKGROUND="&"
+      shift
+      ;;
     -u|--user)
       LOCS=("${LOCS[1]}")
       shift
