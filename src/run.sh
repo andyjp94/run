@@ -119,6 +119,9 @@ function setup_command {
   cat << EOF > "${TEMP_FILE}"
 #!/bin/bash
 
+set -e
+set -o pipefail
+
 
 function watch {
     COMMAND=\${*:2}
@@ -181,6 +184,9 @@ EOF
   else
     cat << EOF > "${TEMP_FILE}"
 #!/bin/bash
+
+set -e
+set -o pipefail
 
 function run { 
   ${CMD}
