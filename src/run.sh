@@ -321,7 +321,10 @@ function init {
    FORCE="${1}"
   for file in ${LOCS[*]}; do 
     if [ ! -f "$file" ]; then 
-      # cat << EOF > "${file}"
+      dir=$(dirname "${file}")
+      if [ ! -d "${dir}" ]; then
+        mkdir -p ${dir}
+      fi
       jq '.' <<EOF > "${file}" 
 {
 	"commands": [{
