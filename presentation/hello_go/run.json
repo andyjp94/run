@@ -1,0 +1,40 @@
+{
+  "commands": [
+    {
+      "command": "default",
+      "executes": ["run.sh build"]
+    },
+    {
+      "command": "format",
+      "executes": [
+        "go fmt"
+      ],
+      "watches": ["*.go"],
+      "env": [],
+      "path": []
+    },
+    {
+      "command": "build",
+      "executes": [
+        "go build"
+      ],
+      "watches": [],
+      "env": [],
+      "path": []
+    },
+    {
+      "command": "run",
+      "executes": [
+        "go fmt",
+        "go build",
+        "go run"
+      ],
+      "watches": ["*.go"],
+      "env": [],
+      "path": []
+    }
+  ],
+  "watches": [],
+  "env": [],
+  "path": []
+}

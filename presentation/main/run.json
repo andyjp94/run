@@ -1,0 +1,25 @@
+{
+  "commands": [
+    {
+      "command": "front:setup",
+      "executes": [
+        "cd front",
+        "yarn install"
+      ],
+      "watches": [],
+      "env": [],
+      "path": [
+      ]
+    }
+  ],
+  "watches": [],
+  "env": [
+    {
+      "name": "global_env",
+      "value": "true"
+    }
+  ],
+  "path": [
+    "/usr/local/bin"
+  ]
+}
