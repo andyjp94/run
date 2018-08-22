@@ -139,6 +139,7 @@ function watch {
                     kill \${previous}
                   fi
                 fi
+                  printf '\e[1;34m%-6s\e[m\n' "${CMD}"
                 sh -c "\$COMMAND" \${background}
                 previous=\$!
                 chsum1=\$chsum2
@@ -151,6 +152,7 @@ function watch {
                     kill \${previous}
                   fi
                 fi
+                  printf '\e[1;34m%-6s\e[m\n' "${CMD}"
                 sh -c "\$COMMAND" \${background}
                 previous=\$!
                
@@ -188,7 +190,8 @@ EOF
 set -e
 set -o pipefail
 
-function run { 
+function run {
+  printf '\e[1;34m%-6s\e[m\n' "${CMD}"
   ${CMD}
 }
 
