@@ -530,8 +530,34 @@ function parse_arguments {
     exit 0
   fi
 
+  containsArgs $@ 
+  
 
-  cmds=("$@")
+}
+
+containsArgs () {
+  local values=($@)
+  pos=$(( ${#values[*]} ))
+    x=0
+    CLI_ARGS=""
+
+    if [ "${values[0]}" = "--" ]; then
+      CLI_ARGS=("${values[@]:1}")
+      cmds=()
+      return
+    fi 
+    for cmd in "${values[@]}"; do
+      x=$((x+1))
+      if [ "${values[${x}]}" = "--" ]; then
+        z=$((x+1))
+        CLI_ARGS="${values[@]:${z}}"
+        cmds=("${values[@]:0:${x}}")
+        return
+      fi
+
+      done
+      
+      cmds=($values)
 
 }
 
@@ -542,26 +568,18 @@ function main {
   LOG_FILE=$(mktemp /tmp/run.XXXXXXXX)
   trap error_handling EXIT
 
-  
-
   if [ -z "${cmds[0]}" ]; then
-    run "default"
-  elif [ "${cmds[0]}" = "--" ]; then
-    run "default" "${cmds[@]:1}"
+    run "default" "${CLI_ARGS}"
   else
-    x=0
-    CLI_ARGS=""
+    pos=$(( ${#cmds[*]} - 1 ))
+    last=${cmds[$pos]}
     for cmd in "${cmds[@]}"; do
-      x=$((x+1))
-      if [ "${cmds[${x}]}" = "--" ]; then
-        y=$((x+1))
-        CLI_ARGS="${cmds[*]:${y}}"
-      fi
-
-      run "${cmd}" "${CLI_ARGS}"
-      if [ "${CLI_ARGS}" != "" ]; then
-        break
-      fi
+      if [[ $cmd == $last ]]; then
+          run "${cmd}" "${CLI_ARGS}"
+          break
+        else 
+          run "${cmd}"
+        fi
     done
   fi
 
