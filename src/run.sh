@@ -82,11 +82,13 @@ function create_path_local {
         path_json=$(echo "${path_dict}" | jq -r --arg INDEX $((index-1)) '.[$INDEX |tonumber]')
         LOCAL_PATH="${PATH_CMD}:${path_json}" 
     done
+  else
+    LOCAL_PATH="${PATH_CMD}"
   fi
+
 }
 
 function create_path {
-  
   local RUN_FILE="${1}"
   local num=0
   num=$(jq '.path | length' < "${RUN_FILE}")
