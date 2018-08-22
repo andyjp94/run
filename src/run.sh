@@ -130,7 +130,7 @@ function watch {
 
     while [[ true ]]
     do
-        chsum2=\$(md5 \${1})
+        chsum2=\$(md5sum \${1})
         if [[ \$chsum1 != \$chsum2 ]]; then
             if [ "\${START_UP}" != "true" ]; then
                 echo "Found a file change, executing..."
