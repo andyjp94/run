@@ -35,7 +35,15 @@ function find_cmd {
     CMD="${CMD/%;/ ${args};}"
   fi
 
+
+
+
   if [ "${CMD}" != "" ]; then
+    if ! [ -z ${ODD_FILE} ]; then
+      local x=
+      CMD='cd '"$(dirname ${LOCS[0]})"';'"${CMD}"
+    fi
+
     return 0
   else
     return 1 
@@ -491,6 +499,7 @@ function parse_arguments {
       ;;
     -f|--file)
       shift
+      ODD_FILE='true'
       LOCS=("${1}")
       shift
       ;;
@@ -536,7 +545,6 @@ function parse_arguments {
   fi
 
   containsArgs $@ 
-  
 
 }
 
