@@ -40,8 +40,10 @@ function find_cmd {
 
   if [ "${CMD}" != "" ]; then
     if ! [ -z ${ODD_FILE} ]; then
-      local x=
-      CMD='cd '"$(dirname ${LOCS[0]})"';'"${CMD}"
+      if [ -z ${watch} ]; then
+        CMD='cd '"$(dirname ${LOCS[0]})"';'"${CMD}"
+      fi
+      
     fi
 
     return 0
@@ -190,8 +192,14 @@ if [ "${BACKGROUND}" != "" ]; then
   previous=""
 fi
 
+if ! [ -z "${ODD_FILE}" ]; then
+  dir=$(dirname ${LOCS[0]})
+  printf '\e[1;34m%-6s\e[m\n' 'cd '"\${dir}"
+  cd "\${dir}"
+fi
 
-main "${watch}" "${CMD}"
+
+main "${watch}" "${CMD}" 
 EOF
   else
     cat << EOF > "${TEMP_FILE}"
@@ -570,7 +578,7 @@ containsArgs () {
 
       done
       
-      cmds=($values)
+      cmds=("${values[@]}")
 
 }
 
